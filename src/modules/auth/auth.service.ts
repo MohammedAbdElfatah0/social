@@ -9,7 +9,7 @@ import { sendEmail } from "../../utils/email";
 class AuthService {
 
     // private dbService = new AbstractRepository<IUser>(User);
-    private userRepository = new UserRepository();
+    private readonly userRepository = new UserRepository();
     private authFactoryService = new AuthFactoryService();
     constructor() { }
 

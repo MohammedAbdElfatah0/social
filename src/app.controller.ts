@@ -1,6 +1,7 @@
 import { Express, NextFunction, Request, Response } from "express"
 import authRouter from "./modules/auth/auth.controller";
 import { connectDB } from "./DB/connectedDB";
+import { AppError } from "./utils/error";
 export const bootstrap = (app: Express, express: any) => {
     app.use(express.json());
     connectDB();
@@ -17,12 +18,13 @@ export const bootstrap = (app: Express, express: any) => {
         })
     });
     //global error handler
-    app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
 
         return res.status(400).json({
             message: err.message,
             success: false,
             errorStack: err.stack,
+            errorDetails: err.errorDetails
         });
 
 
