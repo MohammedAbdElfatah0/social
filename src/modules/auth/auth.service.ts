@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { ConfirmAccountDto, LoginDto, RegisterDto } from "./auth.dto";
-import { BadRequestException, ConflictException, NotFoundException } from "../../utils/error";
-import { UserRepository } from "../../DB/models/user/user.repository";
+import { UserRepository } from "../../DB";
 import { AuthFactoryService } from "./factory";
-import { comparePassword } from "../../utils/hash";
-import { sendEmail } from "../../utils/email";
+import { BadRequestException, ConflictException, NotFoundException, comparePassword, sendEmail } from "../../utils";
 
 class AuthService {
 

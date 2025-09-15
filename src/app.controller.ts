@@ -1,7 +1,7 @@
 import { Express, NextFunction, Request, Response } from "express"
-import authRouter from "./modules/auth/auth.controller";
-import { connectDB } from "./DB/connectedDB";
-import { AppError } from "./utils/error";
+import { authRouter } from "./modules";
+import { connectDB } from "./DB";
+import { AppError } from "./utils";
 export const bootstrap = (app: Express, express: any) => {
     app.use(express.json());
     connectDB();

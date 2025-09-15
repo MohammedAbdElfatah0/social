@@ -1,4 +1,4 @@
-import { IUser } from "../../../utils/commen/interface";
+import { IUser } from "../../../utils";
 import { AbstractRepository } from "../../abstract.repository";
 import { User } from "./user.model";
 

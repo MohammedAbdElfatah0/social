@@ -1,10 +1,8 @@
-import { SYS_ROLE } from "../../../utils/commen/enum";
-import { hashPassword } from "../../../utils/hash";
-import { generateOTP, generateOtpExpiryAt } from "../../../utils/otp";
+import { SYS_ROLE, hashPassword, generateOTP, generateOtpExpiryAt } from "../../../utils";
 import { ConfirmAccountDto, RegisterDto } from "../auth.dto";
 import { ConfirmAccountEntity, RegisterEntity } from "../entity";
 
-export  class AuthFactoryService {
+export class AuthFactoryService {
     constructor() { }
     async register(registerDto: RegisterDto) {
         const user = new RegisterEntity();
@@ -19,7 +17,7 @@ export  class AuthFactoryService {
         user.credentialUpdataAt = new Date();
         return user;
     }
-    async confrimAccount(confirmAccountDto:ConfirmAccountDto){
+    async confrimAccount(confirmAccountDto: ConfirmAccountDto) {
         const user = new ConfirmAccountEntity();
         user.email = confirmAccountDto.email;
         user.otp = '';

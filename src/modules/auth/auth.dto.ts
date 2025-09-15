@@ -1,4 +1,4 @@
-import { GENDER } from "../../utils/commen/enum";
+import { GENDER } from "../../utils";
 
 export interface RegisterDto {
     fullName?: string;

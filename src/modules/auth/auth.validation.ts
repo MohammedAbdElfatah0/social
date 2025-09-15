@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { RegisterDto } from "./auth.dto";
-import { GENDER } from "../../utils/commen/enum";
+import { GENDER } from "../../utils";
 
 export const registerSchema = z.object<RegisterDto>({
 
