@@ -15,6 +15,7 @@ export class AuthFactoryService {
         user.otp = generateOTP();
         user.otpExpiryAt = generateOtpExpiryAt(24 * 60);//1day
         user.credentialUpdataAt = new Date();
+        user.isVerified=false;
         return user;
     }
     async confrimAccount(confirmAccountDto: ConfirmAccountDto) {

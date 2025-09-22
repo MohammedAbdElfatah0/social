@@ -2,7 +2,7 @@ import { z } from "zod";
 import { RegisterDto } from "./auth.dto";
 import { GENDER } from "../../utils";
 
-export const registerSchema = z.object<RegisterDto>({
+export const registerSchema = z.strictObject<RegisterDto>({
 
     fullName: z.string().min(2).max(20) as unknown as string,
     email: z.email() as unknown as string,

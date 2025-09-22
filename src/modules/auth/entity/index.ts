@@ -13,6 +13,7 @@ export class RegisterEntity {
    public userAgent!: USER_AGENT;
    public otp!: string;
    public otpExpiryAt!: Date;
+   public isVerified!: boolean;
 }
  export class ConfirmAccountEntity {
     public email!: string;
