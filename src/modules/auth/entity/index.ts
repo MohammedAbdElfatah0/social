@@ -15,9 +15,9 @@ export class RegisterEntity {
    public otpExpiryAt!: Date;
    public isVerified!: boolean;
 }
- export class ConfirmAccountEntity {
-    public email!: string;
-    public otp!: string;
-   public otpExpiryAt!: Date;
+export class ConfirmAccountEntity {
+   public email!: string;
+   public otp!: string;
+   public otpExpiryAt!: Date |string;
    public isVerified!: boolean;
- }
+}

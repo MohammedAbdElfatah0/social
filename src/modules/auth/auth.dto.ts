@@ -7,15 +7,15 @@ export interface RegisterDto {
     phoneNumber?: string;
     gender: GENDER;
 }
-export interface LoginDto{
-    email:string;
-    password:string;
-    isVerified?:boolean;
+export interface LoginDto {
+    email: string;
+    password: string;
+    isVerified?: boolean;
 }
-export interface ConfirmAccountDto{
-    email:string;
-    otp:string;
+export interface ConfirmAccountDto {
+    email: string;
+    otp: string ;
 }
-export interface UpdateUserDto extends Partial<RegisterDto>{
+export interface UpdateUserDto extends Partial<RegisterDto> {
 
 }

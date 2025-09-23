@@ -15,15 +15,14 @@ export class AuthFactoryService {
         user.otp = generateOTP();
         user.otpExpiryAt = generateOtpExpiryAt(24 * 60);//1day
         user.credentialUpdataAt = new Date();
-        user.isVerified=false;
+        user.isVerified = false;
         return user;
     }
     async confrimAccount(confirmAccountDto: ConfirmAccountDto) {
         const user = new ConfirmAccountEntity();
-        user.email = confirmAccountDto.email;
-        user.otp = '';
         user.isVerified = true;
-        // user.otpExpiryAt = undefined;//how send data undefind
+        user.otp = "";
+        user.otpExpiryAt = "";
         return user;
     }
 }

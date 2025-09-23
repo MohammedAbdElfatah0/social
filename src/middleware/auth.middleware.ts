@@ -13,5 +13,6 @@ export const isValidation = (shema: ZodType) => {
             }));
             throw new BadRequestException("Validation error", errMessage);
         }
+        next();
     };
 };

@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { IUser, SYS_ROLE, GENDER, USER_AGENT } from "../../../utils";
+import { IUser, SYS_ROLE, GENDER, USER_AGENT, sendEmail } from "../../../utils";
 
 
 export const userSchema = new Schema<IUser>({
@@ -84,3 +84,26 @@ userSchema.virtual("fullName")
         this.fristName = fullName.split(" ")[0] as string;
         this.lastName = fullName.split(" ")[1] as string;
     });
+
+userSchema.pre("save", async function (next) {
+    if (this.isVerified) {
+        return next();
+    }
+    if (this.isNew && this.userAgent !== USER_AGENT.google) {
+        console.log(this);
+        await sendEmail({
+            to: this.email,
+            subject: "Confirm your email",
+            html: `
+                            <h2>Confirm Your Account</h2>
+                            <p>Hello,</p>
+                            <p>Thanks for signing up! Please use the code below to confirm your email:</p>
+                            <h3 style="color:blue;">${this.otp}</h3>
+                            <p>If you didn’t request this, ignore this email.</p>
+                            `,
+
+        });
+        next();
+    }
+
+});

@@ -3,6 +3,7 @@ import { ConfirmAccountDto, LoginDto, RegisterDto } from "./auth.dto";
 import { UserRepository } from "../../DB";
 import { AuthFactoryService } from "./factory";
 import { BadRequestException, ConflictException, NotFoundException, comparePassword, sendEmail } from "../../utils";
+import { authProvider } from "./provider/auth.provider";
 
 class AuthService {
 
@@ -24,20 +25,8 @@ class AuthService {
         }
         //prepare data for create user
         const userData = await this.authFactoryService.register(registerDto);
-        //send email
-        await sendEmail({
-            to: userData.email,
-            subject: "Confirm your email",
-            html: `
-                <h2>Confirm Your Account</h2>
-                <p>Hello,</p>
-                <p>Thanks for signing up! Please use the code below to confirm your email:</p>
-                <h3 style="color:blue;">${userData.otp}</h3>
-                <p>If you didn’t request this, ignore this email.</p>
-                `
-        })
-        const user = await this.userRepository.create(userData);
-
+        console.log(userData);
+        const user = await this.userRepository.create(userData);//save include send email
         return res.status(201).json({
             message: "User created successfully",
             success: true,
@@ -52,25 +41,24 @@ class AuthService {
         if (!user) {
             return next(new NotFoundException("User not found"));
         }
-        //check otp is valid
-        if (user.otp !== confirmAccountDto.otp) {
-            return next(new BadRequestException("Invalid otp"));
+        await authProvider.CheckOtp(confirmAccountDto, user);
+        //check user is verified
+        if (user!.isVerified) {
+            return next(new BadRequestException("User already verified"));
         }
         //update user
         const updatedUser = await this.authFactoryService.confrimAccount(confirmAccountDto);
-        await this.userRepository.update({ email: confirmAccountDto.email }, updatedUser);
+        console.log(updatedUser);
+        await this.userRepository.update({ email: confirmAccountDto.email }, { $set: updatedUser });
         //send response
-        return res.status(200).json({
-            message: "User confirmed successfully",
-            success: true,
-        });
+        return res.sendStatus(204);
     }
+    //Login
     login = async (req: Request, res: Response, next: NextFunction) => {
         // get data 
         const loginDto: LoginDto = req.body;
         // check user is exist
         const user = await this.userRepository.exist({ email: loginDto.email, isVerified: true });
-
         if (!user) {
             return next(new NotFoundException("User not found"));
         }
@@ -89,6 +77,24 @@ class AuthService {
                 refreshToken: "will do"
             }
         });
+    }
+    //forgot password
+    forgetPassword = (req: Request, res: Response, next: NextFunction) => {
+        //get data
+        //check user is exist
+        //resend otp
+        //check otp from provider
+        //update user password and credentialUpdataAt for expreied refresh token
+        //send response
+
+    }
+
+    //resend otp
+    resendOtp = (req: Request, res: Response, next: NextFunction) => {
+        //get data
+        //check otp from provider
+        //resend otp as email by save how??
+        //send response
     }
 
 }
