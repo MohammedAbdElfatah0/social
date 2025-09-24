@@ -13,6 +13,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "concurrently": "^9.2.1",
+    "crypto-js": "^4.2.0",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "mongoose": "^8.18.1",
@@ -20,6 +21,7 @@
     "zod": "^4.1.8"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",
     "@types/nodemailer": "^7.0.1"
