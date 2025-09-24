@@ -24,7 +24,7 @@ class AuthService {
             return next(new ConflictException("User already exist"));
         }
         //prepare data for create user
-        const userData = await this.authFactoryService.register(registerDto);
+        const userData = await this.authFactoryService.registerFactory(registerDto);
         console.log(userData);
         const user = await this.userRepository.create(userData);//save include send email
         return res.status(201).json({
@@ -47,7 +47,7 @@ class AuthService {
             return next(new BadRequestException("User already verified"));
         }
         //update user
-        const updatedUser = await this.authFactoryService.confrimAccount(confirmAccountDto);
+        const updatedUser = await this.authFactoryService.confrimAccountFactory(confirmAccountDto);
         console.log(updatedUser);
         await this.userRepository.update({ email: confirmAccountDto.email }, { $set: updatedUser });
         //send response
@@ -71,7 +71,7 @@ class AuthService {
         );
 
         //resend otp as email by save how??
-        const updatedUser = await this.authFactoryService.resendOtp(resendOtpDto);
+        const updatedUser = await this.authFactoryService.resendOtpFactory(resendOtpDto);
         console.log(updatedUser);
         await this.userRepository.update({ email: resendOtpDto.email }, { $set: updatedUser });
         //send response
@@ -94,7 +94,7 @@ class AuthService {
         //check otp from provider
         await authProvider.CheckOtp({ email: forgetPasswordDto.email, otp: user.otp! }, user);
         //update user password and credentialUpdataAt for expreied refresh token
-        const updatedUser = await this.authFactoryService.forgetPassword(forgetPasswordDto);
+        const updatedUser = await this.authFactoryService.forgetPasswordFactory(forgetPasswordDto);
         console.log(updatedUser);
         await this.userRepository.update({ email: forgetPasswordDto.email }, { $set: updatedUser });
         //send response
