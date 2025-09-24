@@ -21,3 +21,14 @@ export class ConfirmAccountEntity {
    public otpExpiryAt!: Date |string;
    public isVerified!: boolean;
 }
+export class ResendOtpEntity {
+   public email!: string;
+   public otp!: string;
+   public otpExpiryAt!: Date |string; 
+}
+export class ForgetPasswordEntity {
+   public email!: string;
+   public otp!: string;
+   public otpExpiryAt!: Date |string; 
+   public password!: string;
+}

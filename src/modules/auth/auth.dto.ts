@@ -16,6 +16,16 @@ export interface ConfirmAccountDto {
     email: string;
     otp: string ;
 }
+export interface ResendOtpDto {
+    email: string;
+    otp?:string;//not required
+}
+export interface ForgetPasswordDto {
+    email: string;
+    otp: string;
+    password: string;
+    confirmPassword: string;
+}
 export interface UpdateUserDto extends Partial<RegisterDto> {
 
 }

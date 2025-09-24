@@ -1,6 +1,6 @@
-import { SYS_ROLE, hashPassword, generateOTP, generateOtpExpiryAt } from "../../../utils";
-import { ConfirmAccountDto, RegisterDto } from "../auth.dto";
-import { ConfirmAccountEntity, RegisterEntity } from "../entity";
+import { SYS_ROLE, hashPassword, generateOTP, generateOtpExpiryAt, sendEmail } from "../../../utils";
+import { ConfirmAccountDto, ForgetPasswordDto, RegisterDto, ResendOtpDto } from "../auth.dto";
+import { ConfirmAccountEntity, ForgetPasswordEntity, RegisterEntity, ResendOtpEntity } from "../entity";
 
 export class AuthFactoryService {
     constructor() { }
@@ -13,7 +13,7 @@ export class AuthFactoryService {
         user.gender = registerDto.gender;
         user.role = SYS_ROLE.user;
         user.otp = generateOTP();
-        user.otpExpiryAt = generateOtpExpiryAt(24 * 60);//1day
+        user.otpExpiryAt = generateOtpExpiryAt();//1min
         user.credentialUpdataAt = new Date();
         user.isVerified = false;
         return user;
@@ -23,6 +23,25 @@ export class AuthFactoryService {
         user.isVerified = true;
         user.otp = "";
         user.otpExpiryAt = "";
+        return user;
+    }
+    async resendOtp(resendOtpDto: ResendOtpDto) {
+        const user = new ResendOtpEntity();
+        user.email = resendOtpDto.email;
+        user.otp = generateOTP();
+        user.otpExpiryAt = generateOtpExpiryAt();//1min
+        await sendEmail({
+            to: user.email,
+            subject: "New OTP",
+            html: `<p>Your new OTP is ${user.otp}</p>`
+        });
+        return user;
+    }
+    async forgetPassword(forgetPasswordDto: ForgetPasswordDto) {
+        const user = new ForgetPasswordEntity();
+        user.password = await hashPassword(forgetPasswordDto.password);
+        user.otp = '';
+        user.otpExpiryAt = '';
         return user;
     }
 }

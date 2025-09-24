@@ -3,7 +3,7 @@ export const generateOTP=()=>{
  return otp.toString();   
 }
 
-export const generateOtpExpiryAt=(minutes:number)=>{
+export const generateOtpExpiryAt=(minutes:number=1)=>{
     const expiryAt=new Date(Date.now()+minutes*60*1000);
     return expiryAt;
 }

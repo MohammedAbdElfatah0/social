@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ConfirmAccountDto, LoginDto, RegisterDto } from "./auth.dto";
+import { ConfirmAccountDto, ForgetPasswordDto, LoginDto, RegisterDto, ResendOtpDto } from "./auth.dto";
 import { UserRepository } from "../../DB";
 import { AuthFactoryService } from "./factory";
 import { BadRequestException, ConflictException, NotFoundException, comparePassword, sendEmail } from "../../utils";
@@ -53,6 +53,53 @@ class AuthService {
         //send response
         return res.sendStatus(204);
     }
+    //resend otp
+    resendOtp = async (req: Request, res: Response, next: NextFunction) => {
+        //get data
+        const resendOtpDto: ResendOtpDto = req.body;
+
+        const user = await this.userRepository.exist({ email: resendOtpDto.email });
+        if (!user) {
+            return next(new NotFoundException("User not found"));
+        }
+        //check otp from provider
+        console.log(user);
+
+        await authProvider.resendOtp(
+            resendOtpDto,
+            user
+        );
+
+        //resend otp as email by save how??
+        const updatedUser = await this.authFactoryService.resendOtp(resendOtpDto);
+        console.log(updatedUser);
+        await this.userRepository.update({ email: resendOtpDto.email }, { $set: updatedUser });
+        //send response
+        return res.sendStatus(204);
+    }
+    //forgot password
+    forgetPassword = async (req: Request, res: Response, next: NextFunction) => {
+
+        //get data
+        //check password
+        const forgetPasswordDto: ForgetPasswordDto = req.body;
+        if (forgetPasswordDto.password !== forgetPasswordDto.confirmPassword) {
+            return next(new BadRequestException("Password not match"));
+        }
+        //check user is exist
+        const user = await this.userRepository.exist({ email: forgetPasswordDto.email });
+        if (!user) {
+            return next(new NotFoundException("User not found"));
+        }
+        //check otp from provider
+        await authProvider.CheckOtp({ email: forgetPasswordDto.email, otp: user.otp! }, user);
+        //update user password and credentialUpdataAt for expreied refresh token
+        const updatedUser = await this.authFactoryService.forgetPassword(forgetPasswordDto);
+        console.log(updatedUser);
+        await this.userRepository.update({ email: forgetPasswordDto.email }, { $set: updatedUser });
+        //send response
+        return res.sendStatus(204);
+    }
     //Login
     login = async (req: Request, res: Response, next: NextFunction) => {
         // get data 
@@ -67,7 +114,7 @@ class AuthService {
         if (!isPasswordMatch) {
             return next(new BadRequestException("Invalid password"));
         }
-        // generate token
+        // TODO:: generate token
         // send response
         return res.status(200).json({
             message: "User logged in successfully",
@@ -78,24 +125,9 @@ class AuthService {
             }
         });
     }
-    //forgot password
-    forgetPassword = (req: Request, res: Response, next: NextFunction) => {
-        //get data
-        //check user is exist
-        //resend otp
-        //check otp from provider
-        //update user password and credentialUpdataAt for expreied refresh token
-        //send response
 
-    }
 
-    //resend otp
-    resendOtp = (req: Request, res: Response, next: NextFunction) => {
-        //get data
-        //check otp from provider
-        //resend otp as email by save how??
-        //send response
-    }
+
 
 }
 
