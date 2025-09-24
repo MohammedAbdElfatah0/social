@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { IUser, SYS_ROLE, GENDER, USER_AGENT, sendEmail } from "../../../utils";
+import { IUser, SYS_ROLE, GENDER, USER_AGENT, sendEmail, decryptData } from "../../../utils";
 
 
 export const userSchema = new Schema<IUser>({
@@ -98,7 +98,7 @@ userSchema.pre("save", async function (next) {
                             <h2>Confirm Your Account</h2>
                             <p>Hello,</p>
                             <p>Thanks for signing up! Please use the code below to confirm your email:</p>
-                            <h3 style="color:blue;">${this.otp}</h3>
+                            <h3 style="color:blue;">${decryptData(this.otp!)}</h3>
                             <p>If you didn’t request this, ignore this email.</p>
                             `,
 

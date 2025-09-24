@@ -1,6 +1,8 @@
+import { encryptData } from "..";
+
 export const generateOTP=()=>{
  const otp=Math.floor(Math.random()*99999+10000);
- return otp.toString();   
+ return encryptData(otp.toString());   
 }
 
 export const generateOtpExpiryAt=(minutes:number=1)=>{

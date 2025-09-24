@@ -1,4 +1,4 @@
-import { SYS_ROLE, hashPassword, generateOTP, generateOtpExpiryAt, sendEmail } from "../../../utils";
+import { SYS_ROLE, hashPassword, generateOTP, generateOtpExpiryAt, sendEmail, encryptData, decryptData } from "../../../utils";
 import { ConfirmAccountDto, ForgetPasswordDto, RegisterDto, ResendOtpDto } from "../auth.dto";
 import { ConfirmAccountEntity, ForgetPasswordEntity, RegisterEntity, ResendOtpEntity } from "../entity";
 
@@ -9,7 +9,7 @@ export class AuthFactoryService {
         user.fullName = registerDto.fullName as string;
         user.email = registerDto.email;
         user.password = await hashPassword(registerDto.password);
-        user.phoneNumber = registerDto.phoneNumber as string;//encrypt 
+        user.phoneNumber = encryptData(registerDto.phoneNumber as string) as string;//encrypt 
         user.gender = registerDto.gender;
         user.role = SYS_ROLE.user;
         user.otp = generateOTP();
@@ -33,7 +33,7 @@ export class AuthFactoryService {
         await sendEmail({
             to: user.email,
             subject: "New OTP",
-            html: `<p>Your new OTP is ${user.otp}</p>`
+            html: `<p>Your new OTP is ${decryptData(user.otp)}</p>`
         });
         return user;
     }

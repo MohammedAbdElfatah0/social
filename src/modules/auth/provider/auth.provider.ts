@@ -1,5 +1,5 @@
 
-import { BadRequestException, IUser, sendEmail } from "../../../utils";
+import { BadRequestException, decryptData, IUser, sendEmail } from "../../../utils";
 import { ConfirmAccountDto, ResendOtpDto } from "../auth.dto";
 
 export const authProvider = {
@@ -11,7 +11,7 @@ export const authProvider = {
         }
 
         // Check if OTP is valid
-        if (user.otp !== confirmAccountDto.otp) {
+        if (decryptData(user.otp) !== confirmAccountDto.otp) {
             throw new BadRequestException("Invalid OTP");
         }
 
