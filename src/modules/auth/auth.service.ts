@@ -41,7 +41,7 @@ class AuthService {
         if (!user) {
             return next(new NotFoundException("User not found"));
         }
-        await authProvider.CheckOtp(confirmAccountDto, user);
+        await authProvider.CheckOtpProvider(confirmAccountDto, user);
         //check user is verified
         if (user!.isVerified) {
             return next(new BadRequestException("User already verified"));
@@ -65,7 +65,7 @@ class AuthService {
         //check otp from provider
         console.log(user);
 
-        await authProvider.resendOtp(
+        await authProvider.resendOtpProvider(
             resendOtpDto,
             user
         );
@@ -92,7 +92,7 @@ class AuthService {
             return next(new NotFoundException("User not found"));
         }
         //check otp from provider
-        await authProvider.CheckOtp({ email: forgetPasswordDto.email, otp: user.otp! }, user);
+        await authProvider.CheckOtpProvider({ email: forgetPasswordDto.email, otp: user.otp! }, user);
         //update user password and credentialUpdataAt for expreied refresh token
         const updatedUser = await this.authFactoryService.forgetPasswordFactory(forgetPasswordDto);
         console.log(updatedUser);

@@ -4,7 +4,7 @@ import { ConfirmAccountDto, ResendOtpDto } from "../auth.dto";
 
 export const authProvider = {
 
-    async CheckOtp(confirmAccountDto: ConfirmAccountDto, user: IUser) {
+    async CheckOtpProvider(confirmAccountDto: ConfirmAccountDto, user: IUser) {
         // Check if OTP exists
         if (!user.otp || !user.otpExpiryAt) {
             throw new BadRequestException("No OTP found for this user");
@@ -20,7 +20,7 @@ export const authProvider = {
             throw new BadRequestException("OTP has expired");
         }
     },
-    async resendOtp(resendOtpDto: ResendOtpDto, user: IUser) {
+    async resendOtpProvider(resendOtpDto: ResendOtpDto, user: IUser) {
         // Check if OTP is expired
         if (user.otp && user.otpExpiryAt!.getTime() > Date.now()) {
             const timeDiff = user.otpExpiryAt!.getTime() - new Date().getTime();
