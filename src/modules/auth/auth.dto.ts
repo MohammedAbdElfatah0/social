@@ -26,6 +26,3 @@ export interface ForgetPasswordDto {
     password: string;
     confirmPassword: string;
 }
-export interface UpdateUserDto extends Partial<RegisterDto> {
-
-}

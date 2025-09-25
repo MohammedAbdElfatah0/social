@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { ConfirmAccountDto, ForgetPasswordDto, LoginDto, RegisterDto, ResendOtpDto } from "./auth.dto";
 import { UserRepository } from "../../DB";
 import { AuthFactoryService } from "./factory";
-import { BadRequestException, ConflictException, NotFoundException, comparePassword, sendEmail } from "../../utils";
+import { BadRequestException, ConflictException, NotFoundException, comparePassword } from "../../utils";
 import { authProvider } from "./provider/auth.provider";
 
 class AuthService {
@@ -12,7 +12,7 @@ class AuthService {
     private authFactoryService = new AuthFactoryService();
     constructor() { }
 
-    register = async (req: Request, res: Response, next: NextFunction) => {
+    register = async (req: Request, res: Response) => {
         //TODO::: send email for confirmation and otp 
         //get data
         const registerDto: RegisterDto = req.body;
@@ -21,7 +21,7 @@ class AuthService {
         const userExist = await this.userRepository.exist({ email: registerDto.email });
 
         if (userExist) {
-            return next(new ConflictException("User already exist"));
+            throw new ConflictException("User already exist");
         }
         //prepare data for create user
         const userData = await this.authFactoryService.registerFactory(registerDto);
@@ -34,17 +34,17 @@ class AuthService {
         });
     }
     //confirm account 
-    confirmAccount = async (req: Request, res: Response, next: NextFunction) => {
+    confirmAccount = async (req: Request, res: Response) => {
         //get data 
         const confirmAccountDto: ConfirmAccountDto = req.body;
         const user = await this.userRepository.exist({ email: confirmAccountDto.email });
         if (!user) {
-            return next(new NotFoundException("User not found"));
+            throw new NotFoundException("User not found");
         }
         await authProvider.CheckOtpProvider(confirmAccountDto, user);
         //check user is verified
         if (user!.isVerified) {
-            return next(new BadRequestException("User already verified"));
+            throw new BadRequestException("User already verified");
         }
         //update user
         const updatedUser = await this.authFactoryService.confrimAccountFactory(confirmAccountDto);
@@ -54,13 +54,13 @@ class AuthService {
         return res.sendStatus(204);
     }
     //resend otp
-    resendOtp = async (req: Request, res: Response, next: NextFunction) => {
+    resendOtp = async (req: Request, res: Response) => {
         //get data
         const resendOtpDto: ResendOtpDto = req.body;
 
         const user = await this.userRepository.exist({ email: resendOtpDto.email });
         if (!user) {
-            return next(new NotFoundException("User not found"));
+            throw new NotFoundException("User not found");
         }
         //check otp from provider
         console.log(user);
@@ -78,18 +78,18 @@ class AuthService {
         return res.sendStatus(204);
     }
     //forgot password
-    forgetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    forgetPassword = async (req: Request, res: Response) => {
 
         //get data
         //check password
         const forgetPasswordDto: ForgetPasswordDto = req.body;
         if (forgetPasswordDto.password !== forgetPasswordDto.confirmPassword) {
-            return next(new BadRequestException("Password not match"));
+            throw new BadRequestException("Password not match");
         }
         //check user is exist
         const user = await this.userRepository.exist({ email: forgetPasswordDto.email });
         if (!user) {
-            return next(new NotFoundException("User not found"));
+            throw new NotFoundException("User not found");
         }
         //check otp from provider
         await authProvider.CheckOtpProvider({ email: forgetPasswordDto.email, otp: user.otp! }, user);
@@ -101,18 +101,18 @@ class AuthService {
         return res.sendStatus(204);
     }
     //Login
-    login = async (req: Request, res: Response, next: NextFunction) => {
+    login = async (req: Request, res: Response) => {
         // get data 
         const loginDto: LoginDto = req.body;
         // check user is exist
         const user = await this.userRepository.exist({ email: loginDto.email, isVerified: true });
         if (!user) {
-            return next(new NotFoundException("User not found"));
+            throw new NotFoundException("User not found");
         }
         // check password
         const isPasswordMatch = await comparePassword(loginDto.password, user.password);
         if (!isPasswordMatch) {
-            return next(new BadRequestException("Invalid password"));
+            throw new BadRequestException("Invalid password");
         }
         // TODO:: generate token
         // send response
