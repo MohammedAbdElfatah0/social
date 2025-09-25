@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ConfirmAccountDto, ForgetPasswordDto, LoginDto, RegisterDto, ResendOtpDto } from "./auth.dto";
 import { UserRepository } from "../../DB";
 import { AuthFactoryService } from "./factory";
-import { BadRequestException, ConflictException, NotFoundException, comparePassword } from "../../utils";
+import { BadRequestException, ConflictException, ForbiddenException, NotFoundException, comparePassword } from "../../utils";
 import { authProvider } from "./provider/auth.provider";
 
 class AuthService {
@@ -107,12 +107,12 @@ class AuthService {
         // check user is exist
         const user = await this.userRepository.exist({ email: loginDto.email, isVerified: true });
         if (!user) {
-            throw new NotFoundException("User not found");
+            throw new ForbiddenException("User not found");
         }
         // check password
         const isPasswordMatch = await comparePassword(loginDto.password, user.password);
         if (!isPasswordMatch) {
-            throw new BadRequestException("Invalid password");
+            throw new ForbiddenException("Invalid password");
         }
         // TODO:: generate token
         // send response

@@ -11,7 +11,7 @@ export class BadRequestException extends AppError {
     }
 }
 
-export class NotAuthorizedException extends AppError {
+export class UnAuthorizedException extends AppError {
     constructor(message: string, errorDetails?: Record<string, string>[]) {
         super(message, 401, errorDetails);
     }
@@ -24,5 +24,10 @@ export class NotFoundException extends AppError {
 export class ConflictException extends AppError {
     constructor(message: string, errorDetails?: Record<string, string>[]) {
         super(message, 409, errorDetails);
+    }
+}
+export class ForbiddenException extends AppError {
+    constructor(message: string, errorDetails?: Record<string, string>[]) {
+        super(message, 403, errorDetails);
     }
 }
