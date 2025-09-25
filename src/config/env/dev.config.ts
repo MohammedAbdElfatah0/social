@@ -3,7 +3,11 @@ config();
 export const devConfig = {
     // #Database
     DB_URL: process.env.DB_URL,
-    SECRET_KEY:process.env.SECRET_KEY,
+    // #JWT
+    JWT_SECRET_KEY_ACCESS_TOKEN: process.env.JWT_SECRET_KEY_ACCESS_TOKEN,//access token
+    JWT_SECRET_KEY_REFRESH_TOKEN: process.env.JWT_SECRET_KEY_REFRESH_TOKEN,//refresh token
+    // #Secret for encrypt
+    SECRET_KEY: process.env.SECRET_KEY,
     // #servise
     PORT: process.env.PORT,
 

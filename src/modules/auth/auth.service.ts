@@ -4,6 +4,7 @@ import { UserRepository } from "../../DB";
 import { AuthFactoryService } from "./factory";
 import { BadRequestException, ConflictException, ForbiddenException, NotFoundException, comparePassword } from "../../utils";
 import { authProvider } from "./provider/auth.provider";
+import { generateToken } from "../../utils";
 
 class AuthService {
 
@@ -115,13 +116,30 @@ class AuthService {
             throw new ForbiddenException("Invalid password");
         }
         // TODO:: generate token
+        const payload = {
+            id: user._id,
+            role: user.role,
+        }
+        const accessToken = generateToken({
+            payload: payload, options: {
+                expiresIn: "15m"
+            }
+        });
+        const refreshToken = generateToken(
+            {
+                payload: payload, options: {
+                    expiresIn: "7d"
+                }
+            });
+        //TODO save refresh token in database
+
         // send response
         return res.status(200).json({
             message: "User logged in successfully",
             success: true,
             token: {
-                accessToken: "will do",
-                refreshToken: "will do"
+                accessToken,
+                refreshToken
             }
         });
     }
