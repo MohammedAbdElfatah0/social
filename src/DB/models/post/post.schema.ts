@@ -34,7 +34,7 @@ export const postSchema = new Schema<IPost>({
         type: Array,
         default: []
     },
-    reaction: [
+    reactions: [
         reactionSchema
     ],
 },

@@ -36,7 +36,7 @@ export interface IPost {
     userId: ObjectId,
     content: string,
     attachment?: IAttachment[],
-    reaction?: IReaction[],
+    reactions?: IReaction[],
 
 
 }

@@ -1,4 +1,9 @@
-export interface CreatePostDto{
+export interface CreatePostDTO{
     content:string,
     attachment?:any[],//TODO
+}
+export interface ReactionDTO{
+    id:string,
+    userId:string,
+    reaction:number,
 }

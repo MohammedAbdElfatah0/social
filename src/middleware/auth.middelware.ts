@@ -15,17 +15,14 @@ export const authMiddleware = () => {
         // const decodedToken=verifyToken({
         //     token:token.split(" ")[1]
         // })
-        console.log(token);
+
         const payload = verifyToken({
             token
         });
-        console.log(payload);
-        console.log(payload.id);
         const userRepository = new UserRepository();
         const user = await userRepository.exist({
             _id: payload.id,
         });
-        console.log(user);
         if (!user) {
             throw new NotFoundException("User not found");
         }
