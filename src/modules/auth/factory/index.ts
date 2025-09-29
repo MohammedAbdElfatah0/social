@@ -6,6 +6,7 @@ export class AuthFactoryService {
     constructor() { }
     async registerFactory(registerDto: RegisterDto) {
         const user = new RegisterEntity();
+        
         user.fullName = registerDto.fullName as string;
         user.email = registerDto.email;
         user.password = await hashPassword(registerDto.password);
@@ -42,6 +43,7 @@ export class AuthFactoryService {
         user.password = await hashPassword(forgetPasswordDto.password);
         user.otp = '';
         user.otpExpiryAt = '';
+        user.credentialUpdataAt = new Date();
         return user;
     }
 }

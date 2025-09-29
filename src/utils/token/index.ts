@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import { devConfig } from "../../config/env/dev.config";
 //TODO::: add secret key for refresh token 
 export const generateToken = ({
@@ -20,5 +20,5 @@ export const verifyToken = ({
     token: string,
     secretKey?: string
 }) => {
-    return jwt.verify(token, secretKey);
+    return jwt.verify(token, secretKey) as JwtPayload;
 };

@@ -1,5 +1,5 @@
 import { devConfig } from "../../config/env/dev.config";
-import { ISendEmailOptions } from "../commen/interface";
+import { ISendEmailOptions } from "../common/interface";
 import nodemailer, { Transporter } from "nodemailer";
 
 

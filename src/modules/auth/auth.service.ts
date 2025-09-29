@@ -11,7 +11,7 @@ class AuthService {
     // private dbService = new AbstractRepository<IUser>(User);
     private readonly userRepository = new UserRepository();
     private authFactoryService = new AuthFactoryService();
-    constructor() { }
+    // constructor() { }
 
     register = async (req: Request, res: Response) => {
         //TODO::: send email for confirmation and otp 
@@ -92,6 +92,11 @@ class AuthService {
         if (!user) {
             throw new NotFoundException("User not found");
         }
+        //*check user credentialUpdataAt
+        const oneHour = 60 * 60 * 1000;
+        if (user.credentialUpdataAt.getTime() + oneHour > Date.now()) {//1 hour
+            throw new BadRequestException("User already updated");
+        }
         //check otp from provider
         await authProvider.CheckOtpProvider({ email: forgetPasswordDto.email, otp: user.otp! }, user);
         //update user password and credentialUpdataAt for expreied refresh token
@@ -143,7 +148,19 @@ class AuthService {
             }
         });
     }
-
+    //logout
+    logout = async (req: Request, res: Response) => {
+        //get token
+        const token = req.headers.authorization;//accress token
+        const refreshToken = req.headers.refreshToken;//refresh token
+        if (!token || !refreshToken) {
+            throw new BadRequestException("token is required");
+        }
+        //save token in database
+        // await this.userRepository.update({ _id: req.user._id }, { $push: { refreshToken: token } });
+        //send response
+        return res.sendStatus(204);
+    }
 
 
 

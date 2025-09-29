@@ -25,4 +25,11 @@ export interface ForgetPasswordDto {
     otp: string;
     password: string;
     confirmPassword: string;
+    credentialUpdataAt: Date;
+}
+export interface LogoutDto {
+    Headers:{
+        authorization:string,
+        refreshToken:string
+    }
 }

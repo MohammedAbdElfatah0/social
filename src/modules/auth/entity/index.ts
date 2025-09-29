@@ -1,6 +1,8 @@
+import { ObjectId } from "mongoose";
 import { GENDER, SYS_ROLE, USER_AGENT } from "../../../utils";
 
 export class RegisterEntity {
+   public _id!: ObjectId;  
    public fristName!: string;
    public lastName!: string;
    public fullName!: string;
@@ -31,4 +33,5 @@ export class ForgetPasswordEntity {
    public otp!: string;
    public otpExpiryAt!: Date |string; 
    public password!: string;
+   public credentialUpdataAt!: Date;
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ConfirmAccountDto, ForgetPasswordDto, LoginDto, RegisterDto, ResendOtpDto } from "./auth.dto";
+import { ConfirmAccountDto, ForgetPasswordDto, LoginDto, LogoutDto, RegisterDto, ResendOtpDto } from "./auth.dto";
 import { GENDER } from "../../utils";
 
 
@@ -32,7 +32,14 @@ export const forgetPasswordSchema = z.strictObject<ForgetPasswordDto>({
     otp: z.string().min(5).max(5) as unknown as string,
     password: z.string().min(6).max(20) as unknown as string,
     confirmPassword: z.string().min(6).max(20) as unknown as string,
+    credentialUpdataAt: z.date() as unknown as Date,
 });
+export const logoutSchema = z.strictObject<LogoutDto>({
+    Headers: z.object({
+        authorization: z.string(),
+        refreshToken: z.string(),
+    }) as unknown as { authorization: string, refreshToken: string },
+})
 
 
 
