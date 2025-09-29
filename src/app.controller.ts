@@ -1,5 +1,5 @@
 import { Express, NextFunction, Request, Response } from "express"
-import { authRouter } from "./modules";
+import { authRouter, postRouter } from "./modules";
 import { connectDB } from "./DB";
 import { AppError } from "./utils";
 export const bootstrap = (app: Express, express: any) => {
@@ -7,6 +7,7 @@ export const bootstrap = (app: Express, express: any) => {
     connectDB();
     app.use("/auth", authRouter);
     //user
+    app.use("/post", postRouter);
     //message
     //comment
     //post

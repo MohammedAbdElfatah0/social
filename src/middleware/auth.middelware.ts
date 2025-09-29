@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { BadRequestException, NotFoundException, verifyToken } from "../utils";
 import { UserRepository } from "../DB";
 
-export const authMiddleware = ()=>{
+export const authMiddleware = () => {
     return async (
         req: Request,
         res: Response,
@@ -15,14 +15,17 @@ export const authMiddleware = ()=>{
         // const decodedToken=verifyToken({
         //     token:token.split(" ")[1]
         // })
-    
+        console.log(token);
         const payload = verifyToken({
             token
         });
+        console.log(payload);
+        console.log(payload.id);
         const userRepository = new UserRepository();
         const user = await userRepository.exist({
-            _id: payload._id,
+            _id: payload.id,
         });
+        console.log(user);
         if (!user) {
             throw new NotFoundException("User not found");
         }
@@ -41,7 +44,7 @@ export const authMiddleware = ()=>{
             throw new BadRequestException("Token is expired");
         }
         //[credentials update at]
-    
+
         req.user = user;
         next();
     };

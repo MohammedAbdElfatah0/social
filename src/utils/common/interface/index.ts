@@ -1,5 +1,4 @@
-import { JwtPayload } from "jsonwebtoken";
-import { GENDER, SYS_ROLE, USER_AGENT } from "../enum";
+import { GENDER, REACTION, SYS_ROLE, USER_AGENT } from "../enum";
 import { ObjectId } from "mongoose";
 
 
@@ -25,20 +24,20 @@ export interface ISendEmailOptions {
     subject: string;
     html: string;
 }
-export interface IAttachment{
-    url:string,
-    type:string
+export interface IAttachment {
+    url: string,
+    type: string
 }
-export interface IReaction{
-    userId:ObjectId,
-    type:string
+export interface IReaction {
+    userId: ObjectId,
+    reaction: REACTION
 }
 export interface IPost {
     userId: ObjectId,
     content: string,
     attachment?: IAttachment[],
-    reaction?:IReaction[],
-    
+    reaction?: IReaction[],
+
 
 }
 declare module "jsonwebtoken" {

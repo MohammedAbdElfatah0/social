@@ -1,8 +1,8 @@
 import { Schema } from "mongoose";
-import { IPost } from "../../../utils";
+import { IPost, IReaction } from "../../../utils";
 import { REACTION } from "../../../utils/common/enum";
 
-const reactionSchema = new Schema({
+const reactionSchema = new Schema<IReaction>({
     reaction: {
         type: Number,
         enum: REACTION,
@@ -24,10 +24,10 @@ export const postSchema = new Schema<IPost>({
     },
     content: {
         type: String,
-        required: function (this: any) {
-            const count = Array.isArray(this?.attachment) ? this.attachment.length : 0;
-            return count === 0;
-        },
+        // required: function (this: any) {
+        //     const count = Array.isArray(this?.attachment) ? this.attachment.length : 0;
+        //     return count === 0;
+        // },
         trim: true,
     },
     attachment: {
