@@ -3,6 +3,7 @@ import { PostRepository } from "../../DB";
 import { CreatePostDTO, ReactionDTO } from "./post.DTO";
 import { PostFactorySevices } from "./factory";
 import { NotFoundException, REACTION } from "../../utils";
+import { success } from "zod";
 
 
 class PostService {
@@ -72,6 +73,29 @@ class PostService {
 
         //sent response 
         return res.sendStatus(204);
+    };
+    public getSpecific = async (req: Request, res: Response) =>{
+        //get data
+        const { id } = req.params;
+
+        //user is exist
+        const postExist = await this.postRepository.getAll({ _id: id }, {}, {
+            populate: [
+                { path: "userId", select: "fullName fristName lastName " },
+                { path: "reactions.userId", select: "fullName fristName lastName " },
+                //TOOD::comment
+            ]
+        });
+        console.log(postExist);
+        //threw error 
+        if (!postExist) throw new NotFoundException("post not found");
+
+        //response
+        res.status(200).json({
+            message: "done", success: true, data: {
+                postExist
+            }
+        })
     };
 }
 export default new PostService();
