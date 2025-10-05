@@ -5,5 +5,5 @@ export interface CreatePostDTO{
 export interface ReactionDTO{
     id:string,
     userId:string,
-    reaction:number,
+    reaction:number | undefined,
 }

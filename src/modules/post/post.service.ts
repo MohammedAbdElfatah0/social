@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { PostRepository } from "../../DB/models/post/post.repository";
+import { PostRepository } from "../../DB";
 import { CreatePostDTO, ReactionDTO } from "./post.DTO";
 import { PostFactorySevices } from "./factory";
-import { NotFoundException } from "../../utils";
+import { NotFoundException, REACTION } from "../../utils";
 
 
 class PostService {
@@ -22,17 +22,18 @@ class PostService {
             data: { createPost }
         });
     };
+
     public addReaction = async (req: Request, res: Response) => {
         //get data -> params body req.user
         const reactionDTO: ReactionDTO = { ...req.params, userId: req.user!._id.toString(), ...req.body };
         console.log(reactionDTO)
         //check post is exist
-        const post = await this.postRepository.exist({ _id: reactionDTO.id });
-        console.log(post)
-        if (!post)
+        const postExist = await this.postRepository.exist({ _id: reactionDTO.id });
+        console.log(postExist)
+        if (!postExist)
             throw new NotFoundException("Post not found");
         //check reaction is exist
-        let reactionIndex = post.reactions!.findIndex((reaction) => reaction.userId.toString() === reactionDTO.userId);
+        let reactionIndex = postExist.reactions!.findIndex((reaction) => reaction.userId.toString() === reactionDTO.userId);
         if (reactionIndex == -1) {
             console.log("reaction not exist")
             await this.postRepository.update(
@@ -47,6 +48,17 @@ class PostService {
                         }
                     }
                 });
+        }
+        else if ([undefined, null, ""].includes(reactionDTO.reaction as any)) {
+            this.postRepository.update(
+                {
+                    _id: reactionDTO.id
+
+                },
+                {
+                    $pull: { reactions: postExist.reactions?.[reactionIndex] }
+                })
+
         }
         else {
             console.log("reaction  exist")
