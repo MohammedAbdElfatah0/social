@@ -40,6 +40,15 @@ export interface IPost {
 
 
 }
+export interface IComment {
+    userId: ObjectId,
+    postId: ObjectId,
+    parentIds: ObjectId[],
+    content: string,
+    attachment: IAttachment,
+    reactions: IReaction[],
+    mentions?: ObjectId[]
+};
 declare module "jsonwebtoken" {
     interface JwtPayload {
         _id: ObjectId;
