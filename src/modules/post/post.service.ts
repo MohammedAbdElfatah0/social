@@ -74,7 +74,7 @@ class PostService {
         //sent response 
         return res.sendStatus(204);
     };
-    public getSpecific = async (req: Request, res: Response) =>{
+    public getSpecific = async (req: Request, res: Response) => {
         //get data
         const { id } = req.params;
 
@@ -83,10 +83,10 @@ class PostService {
             populate: [
                 { path: "userId", select: "fullName fristName lastName " },
                 { path: "reactions.userId", select: "fullName fristName lastName " },
+                { path: "comments", match: { parentIds: [] } }
                 //TOOD::comment
             ]
         });
-        console.log(postExist);
         //threw error 
         if (!postExist) throw new NotFoundException("post not found");
 

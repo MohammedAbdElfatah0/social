@@ -30,4 +30,9 @@ export const postSchema = new Schema<IPost>({
         timestamps: true,
         toJSON: { virtuals: true },
         toObject: { virtuals: true }
+    });
+    postSchema.virtual("comments",{
+        localField:"_id",//post id
+        foreignField:"postId",
+        ref:"Comment"
     })
