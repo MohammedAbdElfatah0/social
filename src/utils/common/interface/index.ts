@@ -33,6 +33,7 @@ export interface IReaction {
     reaction: REACTION
 }
 export interface IPost {
+    _id: ObjectId,
     userId: ObjectId,
     content: string,
     attachment?: IAttachment[],
@@ -41,6 +42,7 @@ export interface IPost {
 
 }
 export interface IComment {
+    _id: ObjectId,
     userId: ObjectId,
     postId: ObjectId,
     parentIds: ObjectId[],

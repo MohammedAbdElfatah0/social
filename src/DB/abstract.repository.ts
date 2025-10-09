@@ -1,12 +1,12 @@
-import { Model, MongooseBaseQueryOptions, MongooseUpdateQueryOptions, ProjectionType, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
+import { Document, Model, MongooseBaseQueryOptions, MongooseUpdateQueryOptions, ProjectionType, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
 
-export abstract class  AbstractRepository<T> {
+export abstract class AbstractRepository<T> {
     constructor(protected model: Model<T>) {
     }
 
-    async create(item: T) {
+    async create(item: T): Promise<T & Document> {
         const doc = new this.model(item);
-        return await doc.save();
+        return await doc.save() as unknown as T & Document;
     }
 
     async exist(
