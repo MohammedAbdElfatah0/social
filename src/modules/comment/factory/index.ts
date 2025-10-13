@@ -7,12 +7,12 @@ export class CommentFactoryService {
         createCommentDTO: CreateCommentDTO,
         user: IUser,
         post: IPost,
-        comment?: IComment
+        comment: IComment
     ) {
         const newComment = new CommentEntity();
         newComment.userId = user._id;
-        newComment.postId = post._id;
-        newComment.parentIds = comment ? [...comment.parentIds, comment._id] : [];//TODO
+        newComment.postId = post?._id || comment.postId;
+        newComment.parentId=  comment?._id;
         newComment.content = createCommentDTO.content;
         newComment.reactions = [];
 

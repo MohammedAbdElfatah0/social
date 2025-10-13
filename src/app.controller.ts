@@ -1,5 +1,5 @@
 import { Express, NextFunction, Request, Response } from "express"
-import { authRouter, postRouter } from "./modules";
+import { authRouter, commentRouter, postRouter } from "./modules";
 import { connectDB } from "./DB";
 import { AppError } from "./utils";
 export const bootstrap = (app: Express, express: any) => {
@@ -8,6 +8,7 @@ export const bootstrap = (app: Express, express: any) => {
     app.use("/auth", authRouter);
     //user
     app.use("/post", postRouter);
+    app.use("/comment", commentRouter);
     //message
     //comment
     //post

@@ -15,13 +15,13 @@ export const commentSchema = new Schema<IComment>(
             ref: "Post",
             required: true
         },
-        parentIds: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "Comment",
-                required: true
-            }
-        ],
+        parentId:
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Comment",
+
+        }
+        ,
         content: {
             type: String,
         },

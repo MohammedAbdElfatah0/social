@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PostRepository } from './../../DB/models/post/post.repository';
-import { NotFoundException } from "../../utils";
+import { IComment, NotFoundException } from "../../utils";
 import { CommentRepository } from './../../DB/models/comment/comment.repository';
 import { CommentFactoryService } from './factory/index';
 import { CreateCommentDTO } from './comment.dto';
@@ -22,7 +22,7 @@ class CommentService {
             throw new NotFoundException("Not Found post");
         }
         //check comment exist and replay comment
-        let commentExist;
+        let commentExist: IComment | any = undefined;
         if (id) {
             commentExist = await this.CommentRepository.exist({ _id: id });
             if (!commentExist) throw new NotFoundException("Not  Found Comment");
@@ -32,7 +32,7 @@ class CommentService {
             createCommentDTO,
             req.user!,
             postExist,
-            commentExist
+            commentExist!
         );
         const createComment = await this.CommentRepository.create(comment);
         //send response 
