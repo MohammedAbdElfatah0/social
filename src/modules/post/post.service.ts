@@ -83,7 +83,7 @@ class PostService {
             populate: [
                 { path: "userId", select: "fullName fristName lastName " },
                 { path: "reactions.userId", select: "fullName fristName lastName " },
-                { path: "comments", match: { parentIds: [] } }
+                { path: "comments", match: { parentId: null } }
                 //TOOD::comment
             ]
         });
