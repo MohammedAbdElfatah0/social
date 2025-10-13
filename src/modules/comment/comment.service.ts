@@ -4,6 +4,7 @@ import { IComment, NotFoundException } from "../../utils";
 import { CommentRepository } from './../../DB/models/comment/comment.repository';
 import { CommentFactoryService } from './factory/index';
 import { CreateCommentDTO } from './comment.dto';
+import { success } from "zod";
 
 class CommentService {
     private readonly PostRepository = new PostRepository();
@@ -40,6 +41,19 @@ class CommentService {
             message: "comment created successfully",
             success: true,
             data: { createComment }
+        })
+    };
+    public getSpecific =async (req: Request, res: Response) => {
+        //get data 
+        const { id } = req.params;
+        //check comment 
+        const commentExist =await this.CommentRepository.exist({ _id: id }, {}, { populate: [{ path: "replies" }] });
+        if (!commentExist) throw new NotFoundException("Not Found Comment")
+        //response 
+        res.status(200).json({
+            message: "comment fetch successfully",
+            success: true,
+            data: { commentExist }
         })
     };
 }

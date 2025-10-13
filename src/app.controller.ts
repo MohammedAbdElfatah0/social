@@ -6,12 +6,10 @@ export const bootstrap = (app: Express, express: any) => {
     app.use(express.json());
     connectDB();
     app.use("/auth", authRouter);
-    //user
     app.use("/post", postRouter);
     app.use("/comment", commentRouter);
     //message
-    //comment
-    //post
+
     //*invalid route
     app.use("/{*dummy}", (req: Request, res: Response, next: NextFunction) => {
         res.status(400).json({
