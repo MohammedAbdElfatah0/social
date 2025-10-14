@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { PostRepository } from "../../DB";
-import { CreatePostDTO, ReactionDTO } from "./post.DTO";
+import { NotFoundException, UnAuthorizedException } from "../../utils";
 import { PostFactorySevices } from "./factory";
-import { NotFoundException, REACTION } from "../../utils";
-import { success } from "zod";
+import { CreatePostDTO, ReactionDTO } from "./post.DTO";
 
 
 class PostService {
@@ -96,6 +95,29 @@ class PostService {
                 postExist
             }
         })
+    };
+
+
+    public deletePost = async (req: Request, res: Response) => {
+        //get data 
+        const { id } = req.params;
+        //check comment is exist?
+        const postExist = await this.postRepository.exist({ _id: id }, {}, {
+            populate: [{ path: "postId", select: "userId" }]
+        });
+        if (!postExist) throw new NotFoundException("comment not found")
+        //check are user?
+        if (
+            ![
+                postExist.userId.toString(),
+            ]
+                .includes(req.user!._id.toString())) throw new UnAuthorizedException("you are not authorized to delete this comment")
+        //delete comment from DB
+        await this.postRepository.delete({ _id: id });
+
+        //response
+        res.sendStatus(203);
+
     };
 }
 export default new PostService();
