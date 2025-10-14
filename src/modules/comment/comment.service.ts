@@ -18,15 +18,22 @@ class CommentService {
         console.log({ postId, id, user: req.user?._id });
         const createCommentDTO: CreateCommentDTO = req.body;
         //check post exist
-        const postExist = await this.PostRepository.exist({ _id: postId });
-        if (!postExist) {
-            throw new NotFoundException("Not Found post");
-        }
+        let postExist = await this.PostRepository.exist({ _id: postId });
+
         //check comment exist and replay comment
         let commentExist: IComment | any = undefined;
         if (id) {
             commentExist = await this.CommentRepository.exist({ _id: id });
             if (!commentExist) throw new NotFoundException("Not  Found Comment");
+            console.log(commentExist)
+            if (!postExist) {
+
+                //null or undefund
+                postExist = await this.PostRepository.exist({ _id: commentExist.postId });
+            }
+        }
+        if (!postExist) {
+            throw new NotFoundException("Not Found post");
         }
         //prepare data for comment>>> factory
         const comment = this.CommentFactoryService.createComment(
@@ -76,7 +83,7 @@ class CommentService {
         await this.CommentRepository.delete({ _id: id });
 
         //response
-        res.sendStatus(203);
+        res.sendStatus(204);
 
     };
 }

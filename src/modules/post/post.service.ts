@@ -101,22 +101,20 @@ class PostService {
     public deletePost = async (req: Request, res: Response) => {
         //get data 
         const { id } = req.params;
-        //check comment is exist?
-        const postExist = await this.postRepository.exist({ _id: id }, {}, {
-            populate: [{ path: "postId", select: "userId" }]
-        });
-        if (!postExist) throw new NotFoundException("comment not found")
+        //check post is exist?
+        const postExist = await this.postRepository.exist({ _id: id },);
+        if (!postExist) throw new NotFoundException("post not found")
         //check are user?
         if (
             ![
                 postExist.userId.toString(),
             ]
-                .includes(req.user!._id.toString())) throw new UnAuthorizedException("you are not authorized to delete this comment")
-        //delete comment from DB
+                .includes(req.user!._id.toString())) throw new UnAuthorizedException("you are not authorized to delete this post")
+        //delete post from DB
         await this.postRepository.delete({ _id: id });
 
         //response
-        res.sendStatus(203);
+        res.sendStatus(204);
 
     };
 }

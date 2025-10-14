@@ -6,8 +6,8 @@ export const bootstrap = (app: Express, express: any) => {
     app.use(express.json());
     connectDB();
     app.use("/auth", authRouter);
-    app.use("/post", postRouter);
     app.use("/comment", commentRouter);
+    app.use("/post", postRouter);
     //message
 
     //*invalid route
