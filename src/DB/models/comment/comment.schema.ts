@@ -40,3 +40,14 @@ commentSchema.virtual('replies', {
     localField: "_id",
     foreignField: "parentId",
 });
+//delete all replay
+commentSchema.pre("deleteOne", async function (next) {
+    const filter = typeof this.getFilter == "function" ? this.getFilter() : {};
+    const replies = await this.model.find({ parentId: filter._id });
+    if (replies.length) {
+        for (const reply of replies) {
+            await this.model.deleteOne({ _id: reply._id })
+        }
+    }
+    next();
+})
