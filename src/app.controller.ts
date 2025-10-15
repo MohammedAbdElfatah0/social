@@ -1,10 +1,11 @@
 import { Express, NextFunction, Request, Response } from "express"
-import { authRouter, commentRouter, postRouter } from "./modules";
+import { authRouter, commentRouter, postRouter, userRouter } from "./modules";
 import { connectDB } from "./DB";
 import { AppError } from "./utils";
 export const bootstrap = (app: Express, express: any) => {
     app.use(express.json());
     connectDB();
+    app.use("/user", userRouter)
     app.use("/auth", authRouter);
     app.use("/comment", commentRouter);
     app.use("/post", postRouter);
