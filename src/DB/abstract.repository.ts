@@ -16,6 +16,13 @@ export abstract class AbstractRepository<T> {
     ) {
         return await this.model.findOne(filter, projection, options);
     }
+    async findById(
+        filter: RootFilterQuery<T>,
+        projection?: ProjectionType<T>,
+        options?: QueryOptions<T>
+    ) {
+        return await this.model.findById(filter, projection, options);
+    }
 
     async getAll(
         filter: RootFilterQuery<T>,
@@ -32,7 +39,15 @@ export abstract class AbstractRepository<T> {
     ) {
         return await this.model.updateOne(filter, update, options);
     }
-
+    
+    async findByIdAndUpdate(
+        filter: RootFilterQuery<T>,
+        update: UpdateQuery<T>,
+        options?: QueryOptions<T>
+    ) {
+        return await this.model.findByIdAndUpdate(filter, update, options);
+    }
+    
     async delete(
         filter: RootFilterQuery<T>,
         options?: MongooseBaseQueryOptions<T>
