@@ -1,6 +1,6 @@
 import { decryptData } from "../../../utils";
 
-export const decryptPhone = (phone: string, userExist: any) => {
+export const decryptPhone = ( userExist: any) => {
     const decryptedPhone = decryptData(userExist.phoneNumber!);
     const userToShow = {
         ...userExist.toObject(),

@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { UserRepository } from './../../DB/models/user/user.repository';
 import { success } from "zod";
-import { BadRequestException, decryptData, NotFoundException } from "../../utils";
+import { BadRequestException, comparePassword, decryptData, hashPassword, NotFoundException } from "../../utils";
 import { UserDTO } from "./user.dto";
 import { UserFactory } from "./factory";
 import { decryptPhone } from "./provider";
+import { compare } from "bcryptjs";
 
 class UserService {
     /**
@@ -27,7 +28,7 @@ class UserService {
         if (!userExist) throw new NotFoundException("not found user or deleted")
 
         // Decrypt for display only
-        const userToShow = decryptPhone(userExist.phoneNumber!, userExist);
+        const userToShow = decryptPhone(userExist);
 
         res.status(200).json({
             message: "Successfully fetched user profile",
@@ -41,7 +42,7 @@ class UserService {
         const friendExist = await this.userRepository.exist({ _id: id });
         if (!friendExist) throw new NotFoundException("not found user or deleted")
 
-        const userToShow = decryptPhone(friendExist.phoneNumber!, friendExist);
+        const userToShow = decryptPhone(friendExist);
         res.status(200).json({
             message: "successfully get profile user",
             success: true,
@@ -60,7 +61,7 @@ class UserService {
         const updatedData = this.userFactory.updateInfoUser(userDto, userExist);
         const [firstName, lastName] = updatedData.fullName.split(" ");
         // update in DB
-        const updatedUser = await this.userRepository.findByIdAndUpdate(
+        await this.userRepository.findByIdAndUpdate(
             userExist._id,
             {
                 $set: {
@@ -74,12 +75,37 @@ class UserService {
         );
 
         // response
-        res.status(200).json({
-            message: "Successfully updated user info",
-            success: true,
-            data: { user: updatedUser }
-        });
+        res.sendStatus(204);
     };
+    public resetPassword = async (req: Request, res: Response) => {
+        //get data -/> oldpassword / newpassword id from req.user
+        const { oldPassword, newPassword } = req.body;
+        const userExist = await this.userRepository.findById(req.user!._id);
+        if (!userExist) throw new NotFoundException("not found user or deleted")
+        const isMatch = comparePassword(oldPassword, userExist.password)
+        if (!isMatch) throw new BadRequestException("Invalid password")
+        //*check user credentialUpdataAt
+        const oneHour = 60 * 60 * 1000;
+        if (userExist.credentialUpdataAt.getTime() + oneHour > Date.now()) {//1 hour
+            throw new BadRequestException("User already updated");
+        }
+        const hashedPassword = await hashPassword(newPassword)
+        await this.userRepository.findByIdAndUpdate(
+            userExist._id,
+            {
+                $set: {
+                    password: hashedPassword,
+                    credentialUpdataAt: new Date()
+
+                }
+            },
+            { new: true }
+        );
+        //todo :hendle token make it expired 
+        //todo:send mail to make sure change password
+        res.sendStatus(204);
+    }
+
 
 
 }
