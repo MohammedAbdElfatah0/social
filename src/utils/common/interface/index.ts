@@ -17,6 +17,7 @@ export interface IUser {
     otp?: string;
     otpExpiryAt?: Date;
     isVerified?: boolean;
+    pendingEmail?: string;
 }
 
 export interface ISendEmailOptions {

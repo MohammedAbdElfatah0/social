@@ -1,22 +1,23 @@
 import { Request, Response } from "express";
 import { UserRepository } from './../../DB/models/user/user.repository';
 import { success } from "zod";
-import { BadRequestException, comparePassword, decryptData, hashPassword, NotFoundException } from "../../utils";
+import { BadRequestException, comparePassword, decryptData, generateOTP, generateOtpExpiryAt, hashPassword, NotFoundException, sendEmail } from "../../utils";
 import { UserDTO } from "./user.dto";
 import { UserFactory } from "./factory";
 import { decryptPhone } from "./provider";
 import { compare } from "bcryptjs";
+import { on } from "events";
 
 class UserService {
     /**
      * 1-get profile user🚀
      * 2-get profile friend🚀
-     * 3-add friend
-     * 4-remove friend
-     * 5-block friend
+     * 3-add friend⚪
+     * 4-remove friend⚪
+     * 5-block friend⚪
      * 6-updata info user🚀
-     * 7-update password user
-     * 8-update email
+     * 7-update password user🚀
+     * 8-update email🚀
      */
     private readonly userRepository = new UserRepository();
     private readonly userFactory = new UserFactory();
@@ -105,7 +106,117 @@ class UserService {
         //todo:send mail to make sure change password
         res.sendStatus(204);
     }
+    public updateEmail = async (req: Request, res: Response) => {
+        //get data
+        const userId = req.user!._id;
+        const { email: newEmail } = req.body;
+        if (!newEmail) throw new BadRequestException("New email is required.")
+        //user exist
+        const user = await this.userRepository.findById(userId);
+        if (!user) throw new NotFoundException("not found user or deleted")
 
+        //  email already used by another account
+        const existing = await this.userRepository.exist({ email: newEmail });
+        if (existing && existing._id.toString() !== userId.toString()) {
+            throw new BadRequestException("Email already in use.");
+        }
+
+        // Throttle: avoid update spam (e.g., only once per hour)
+        const oneHour = 60 * 60 * 1000;
+        if (user.credentialUpdataAt && (user.credentialUpdataAt.getTime() + oneHour > Date.now())) {
+            throw new BadRequestException("You recently changed credentials. Try later.");
+        }
+
+        // 3) Generate OTP and expiry
+        const otp = generateOTP();
+        const otpExpiryAt = generateOtpExpiryAt(10); // 10 minutes
+
+        // 4) Save pendingEmail + otp (do not overwrite actual email)
+        await this.userRepository.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    pendingEmail: newEmail,
+                    otp,
+                    otpExpiryAt,
+                }
+            },
+            { new: true }
+        );
+
+        // Send OTP to newEmail (and optionally notify old email)
+        // send to new email:
+        await sendEmail({
+            to: newEmail,
+            subject: "Confirm your new email address",
+            html: `<p>Your OTP to confirm email change is: <b>${decryptData(otp)}</b></p>`
+        });
+
+        // optional: send notification to old email (security alert)
+        await sendEmail({
+            to: user.email,
+            subject: "Email change requested",
+            html: `<p>We received a request to change your account email to <b>${newEmail}</b>. If this wasn't you, ignore or contact support.</p>`
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "OTP sent to the new email. Please confirm to complete the update."
+        });
+    };
+
+    public confirmEditEmail = async (req: Request, res: Response) => {
+
+        const userId = req.user!._id;
+        const { otp } = req.body;
+        if (!otp) throw new BadRequestException("OTP is required.");
+
+        // find user with matching otp (and pendingEmail)
+        const user = await this.userRepository.exist({ _id: userId });
+        if (!user) throw new NotFoundException("not found user or deleted")
+
+        // check expiry
+        if (!user.otpExpiryAt || user.otpExpiryAt.getTime() < Date.now()) {
+            // cleanup expired pending data
+            await this.userRepository.findByIdAndUpdate(userId, {
+                $unset: { pendingEmail: "", otp: "", otpExpiryAt: "" }
+            });
+            throw new BadRequestException("OTP expired. Request again.");
+        }
+
+        // At this point: pendingEmail exists and OTP valid
+        const newEmail = user.pendingEmail;
+        if (!newEmail) {
+            // unexpected — cleanup
+            await this.userRepository.findByIdAndUpdate(userId, { $unset: { otp: "", otpExpiryAt: "" } });
+            throw new BadRequestException("No pending email to confirm.");
+        }
+
+        // Final security check: ensure newEmail not used by another account (race condition)
+        const existing = await this.userRepository.exist({ email: newEmail });
+        if (existing && existing._id.toString() !== userId.toString()) {
+            // somebody registered that email meanwhile
+            await this.userRepository.findByIdAndUpdate(userId, { $unset: { pendingEmail: "", otp: "", otpExpiryAt: "" } });
+            throw new BadRequestException("Email now in use. Choose another.");
+        }
+
+        // Apply final update: change email, clear pending fields, set isVerified = true, update credentialUpdataAt
+        await this.userRepository.findByIdAndUpdate(userId, {
+            $set: {
+                email: newEmail,
+                pendingEmail: "",
+                otp: "",
+                otpExpiryAt: "",
+                credentialUpdataAt: new Date()
+            }
+        });
+
+        // Optional: notify both emails
+        await sendEmail({ to: newEmail, subject: "Email changed", html: "<p>Your email was successfully updated.</p>" });
+
+        return res.status(200).json({ success: true, message: "Email successfully updated." });
+
+    };
 
 
 }

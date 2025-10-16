@@ -15,5 +15,11 @@ class UserValidation {
     }).refine((data) => data.newPassword === data.confirmPassword, {
         message: "Passwords do not match",
     });
+    editEmail = z.object({
+        email: z.email(),
+    });
+    confirmEditEmail = z.object({
+        otp: z.string(),
+    });
 }
 export default new UserValidation();
