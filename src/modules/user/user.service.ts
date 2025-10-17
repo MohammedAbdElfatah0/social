@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
 import { UserRepository } from './../../DB/models/user/user.repository';
-import { success } from "zod";
 import { BadRequestException, comparePassword, decryptData, generateOTP, generateOtpExpiryAt, hashPassword, NotFoundException, sendEmail } from "../../utils";
 import { UserDTO } from "./user.dto";
 import { UserFactory } from "./factory";
 import { decryptPhone } from "./provider";
-import { compare } from "bcryptjs";
-import { on } from "events";
+ 
 
 class UserService {
     /**
@@ -87,7 +85,7 @@ class UserService {
         if (!isMatch) throw new BadRequestException("Invalid password")
         //*check user credentialUpdataAt
         const oneHour = 60 * 60 * 1000;
-        if (userExist.credentialUpdataAt.getTime() + oneHour > Date.now()) {//1 hour
+        if (userExist.credentialUpdataAt && (userExist.credentialUpdataAt.getTime() + oneHour > Date.now())) {//1 hour
             throw new BadRequestException("User already updated");
         }
         const hashedPassword = await hashPassword(newPassword)
@@ -182,6 +180,11 @@ class UserService {
                 $unset: { pendingEmail: 1, otp: 1, otpExpiryAt: 1 }
             });
             throw new BadRequestException("OTP expired. Request again.");
+        }
+
+        // validate OTP value
+        if (decryptData(user.otp!) !== otp) {
+            throw new BadRequestException("Invalid OTP.");
         }
 
         // At this point: pendingEmail exists and OTP valid
@@ -288,9 +291,56 @@ class UserService {
             message: "Email verified successfully."
         });
     };
+    public sendTag = async (req: Request, res: Response) => {
+
+        const senderId = req.user!._id;
+        const { idSendTag } = req.body;
 
 
-}
+        const sender = await this.userRepository.findById(senderId);
+        const receiver = await this.userRepository.findById(idSendTag);
+
+        if (!sender || !receiver) {
+            throw new NotFoundException("not found user or deleted")
+        }
+
+        //con't same user send tag to same user
+        if (senderId.toString() === idSendTag.toString()) {
+            throw new BadRequestException("You can't send tag to yourself")
+        }
+        //check user have sent tag to this user
+        const idSendTagStr = idSendTag.toString();
+        const senderIdStr = senderId.toString();
+        if (
+            sender.sentTags?.some((id) => id.toString() === idSendTagStr) ||
+            receiver.receivedTags?.some((id) => id.toString() === senderIdStr)
+        ) {
+            throw new BadRequestException("You have already sent a tag to this user")
+        }
+
+
+        await this.userRepository.update(
+            { _id: senderId },
+            { $push: { sentTags: idSendTag } }
+        );
+
+        await this.userRepository.update(
+            { _id: idSendTag },
+            { $push: { receivedTags: senderId } }
+        );
+        sendEmail({
+            to: receiver.email,
+            subject: "Tag sent",
+            html: `<p>${sender.fullName} sent you a tag</p>`
+        });
+
+        return res.status(200).json({
+            message: "Tag sent successfully",
+            success: true
+        });
+
+    };
+};
 
 
 export default new UserService();

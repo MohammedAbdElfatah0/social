@@ -21,11 +21,13 @@ class UserValidation {
     confirmEditEmail = z.strictObject({
         otp: z.string().regex(/^[0-9]{5}$/),
     });
-    sendOtp2verifyEmail = z.strictObject({
-        email: z.email(),
-    });
+
     confirm2VerifyEmail = z.strictObject({
         otp: z.string().regex(/^[0-9]{5}$/),
     });
+    sendTag = z.strictObject({
+        idSendTag: z.string(),
+    });
+    
 }
 export default new UserValidation();

@@ -19,6 +19,8 @@ export interface IUser {
     isVerified?: boolean;
     pendingEmail?: string;
     is2Verified?: boolean;
+    sentTags?: ObjectId[];
+    receivedTags?: ObjectId[];
 }
 
 export interface ISendEmailOptions {

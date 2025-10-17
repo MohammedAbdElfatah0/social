@@ -71,6 +71,16 @@ export const userSchema = new Schema<IUser>({
     is2Verified: {
         type: Boolean,
         default: false
+    },
+    sentTags: {
+        type: [Schema.Types.ObjectId],
+        ref: "User",
+        default: []
+    },
+    receivedTags: {
+        type: [Schema.Types.ObjectId],
+        ref: "User",
+        default: []
     }
 },
     {
