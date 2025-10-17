@@ -6,7 +6,7 @@ export class AuthFactoryService {
     constructor() { }
     async registerFactory(registerDto: RegisterDto) {
         const user = new RegisterEntity();
-        
+
         user.fullName = registerDto.fullName as string;
         user.email = registerDto.email;
         user.password = await hashPassword(registerDto.password);
@@ -22,8 +22,8 @@ export class AuthFactoryService {
     async confrimAccountFactory(confirmAccountDto: ConfirmAccountDto) {
         const user = new ConfirmAccountEntity();
         user.isVerified = true;
-        user.otp = "";
-        user.otpExpiryAt = "";
+        user.otp = undefined;
+        user.otpExpiryAt = undefined;
         return user;
     }
     async resendOtpFactory(resendOtpDto: ResendOtpDto) {
@@ -41,8 +41,8 @@ export class AuthFactoryService {
     async forgetPasswordFactory(forgetPasswordDto: ForgetPasswordDto) {
         const user = new ForgetPasswordEntity();
         user.password = await hashPassword(forgetPasswordDto.password);
-        user.otp = '';
-        user.otpExpiryAt = '';
+        user.otp = undefined;
+        user.otpExpiryAt = undefined;
         user.credentialUpdataAt = new Date();
         return user;
     }

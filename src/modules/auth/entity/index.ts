@@ -19,8 +19,8 @@ export class RegisterEntity {
 }
 export class ConfirmAccountEntity {
    public email!: string;
-   public otp!: string;
-   public otpExpiryAt!: Date |string;
+   public otp!: string |undefined;
+   public otpExpiryAt!: Date |string |undefined;
    public isVerified!: boolean;
 }
 export class ResendOtpEntity {
@@ -30,8 +30,8 @@ export class ResendOtpEntity {
 }
 export class ForgetPasswordEntity {
    public email!: string;
-   public otp!: string;
-   public otpExpiryAt!: Date |string; 
+   public otp!: string |undefined;
+   public otpExpiryAt!: Date  |undefined; 
    public password!: string;
    public credentialUpdataAt!: Date;
 }

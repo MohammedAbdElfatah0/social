@@ -4,7 +4,7 @@ import { BadRequestException, comparePassword, decryptData, generateOTP, generat
 import { UserDTO } from "./user.dto";
 import { UserFactory } from "./factory";
 import { decryptPhone } from "./provider";
- 
+
 
 class UserService {
     /**
@@ -230,6 +230,8 @@ class UserService {
         //get user from db  
         const user = await this.userRepository.findById(userId);
         if (!user) throw new NotFoundException("not found user or deleted")
+        console.log(user)
+        console.log(user.is2Verified)
         if (user.is2Verified) throw new BadRequestException("User already verified")
 
         //generate otp and expiry time 
