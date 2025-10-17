@@ -16,6 +16,7 @@ class UserService {
      * 6-updata info user🚀
      * 7-update password user🚀
      * 8-update email🚀
+     * 9-send tag🚀
      */
     private readonly userRepository = new UserRepository();
     private readonly userFactory = new UserFactory();
