@@ -67,6 +67,10 @@ export const userSchema = new Schema<IUser>({
     pendingEmail: {
         type: String,
         default: null
+    },
+    is2Verified: {
+        type: Boolean,
+        default: false
     }
 },
     {

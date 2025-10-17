@@ -1,7 +1,7 @@
 import { encryptData } from "..";
 
 export const generateOTP=()=>{
- const otp=Math.floor(Math.random()*99999+10000);
+ const otp=Math.floor(Math.random()*99999+10000);//number is 5 digits
  return encryptData(otp.toString());   
 }
 

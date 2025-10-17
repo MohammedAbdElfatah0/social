@@ -179,7 +179,7 @@ class UserService {
         if (!user.otpExpiryAt || user.otpExpiryAt.getTime() < Date.now()) {
             // cleanup expired pending data
             await this.userRepository.findByIdAndUpdate(userId, {
-                $unset: { pendingEmail: "", otp: "", otpExpiryAt: "" }
+                $unset: { pendingEmail: 1, otp: 1, otpExpiryAt: 1 }
             });
             throw new BadRequestException("OTP expired. Request again.");
         }
@@ -188,7 +188,7 @@ class UserService {
         const newEmail = user.pendingEmail;
         if (!newEmail) {
             // unexpected — cleanup
-            await this.userRepository.findByIdAndUpdate(userId, { $unset: { otp: "", otpExpiryAt: "" } });
+            await this.userRepository.findByIdAndUpdate(userId, { $unset: { otp: 1, otpExpiryAt: 1 } });
             throw new BadRequestException("No pending email to confirm.");
         }
 
@@ -196,17 +196,19 @@ class UserService {
         const existing = await this.userRepository.exist({ email: newEmail });
         if (existing && existing._id.toString() !== userId.toString()) {
             // somebody registered that email meanwhile
-            await this.userRepository.findByIdAndUpdate(userId, { $unset: { pendingEmail: "", otp: "", otpExpiryAt: "" } });
+            await this.userRepository.findByIdAndUpdate(userId, { $unset: { pendingEmail: 1, otp: 1, otpExpiryAt: 1 } });
             throw new BadRequestException("Email now in use. Choose another.");
         }
 
         // Apply final update: change email, clear pending fields, set isVerified = true, update credentialUpdataAt
         await this.userRepository.findByIdAndUpdate(userId, {
+            $unset: {
+                pendingEmail: 1,
+                otp: 1,
+                otpExpiryAt: 1,
+            },
             $set: {
                 email: newEmail,
-                pendingEmail: "",
-                otp: "",
-                otpExpiryAt: "",
                 credentialUpdataAt: new Date()
             }
         });
@@ -216,6 +218,75 @@ class UserService {
 
         return res.status(200).json({ success: true, message: "Email successfully updated." });
 
+    };
+
+    public sendOtp2verifyEmail = async (req: Request, res: Response) => {
+        //get data token from req.user
+        const userId = req.user!._id;
+        //check is2Verified 
+        //get user from db  
+        const user = await this.userRepository.findById(userId);
+        if (!user) throw new NotFoundException("not found user or deleted")
+        if (user.is2Verified) throw new BadRequestException("User already verified")
+
+        //generate otp and expiry time 
+        const otp = generateOTP();
+        const otpExpiryAt = generateOtpExpiryAt(10);
+        //save otp and expiry time in db
+        await this.userRepository.findByIdAndUpdate(userId, {
+            $set: {
+                otp,
+                otpExpiryAt
+            }
+        });
+        //send otp to user email
+        await sendEmail({
+            to: user.email,
+            subject: "2 verify email",
+            html: `
+             <h2>2 verify email</h2>
+             <p>Hello,</p>
+             <p> Please use the code below to confirm your email:</p>
+             <h3 style="color:blue;">${decryptData(otp)}</h3>
+         `
+        });
+        //return success
+        return res.status(200).json({
+            success: true,
+            message: "OTP sent to the email. Please confirm to verify email."
+        });
+
+
+    };
+    public confirm2VerifyEmail = async (req: Request, res: Response) => {
+        //get email,otp from req.body 
+        const { otp } = req.body;
+        //check otp and expiry time
+        const user = await this.userRepository.findById(req.user!._id);
+        if (!user) throw new NotFoundException("not found user or deleted")
+        if (!user.otp || !user.otpExpiryAt || user.otpExpiryAt.getTime() < Date.now()) {
+            throw new BadRequestException("OTP expired. Request again.");
+        }
+        // console.log({ userOtp: user.otp, otp });
+        if (decryptData(user.otp) !== otp) {
+            throw new BadRequestException("Invalid OTP.");
+        }
+        //get user from db
+        await this.userRepository.findByIdAndUpdate(req.user!._id, {
+            $unset: {
+                otp: 1,
+                otpExpiryAt: 1,
+            },
+            $set: {
+                is2Verified: true,
+                credentialUpdataAt: new Date()
+            }
+        });
+        //return success
+        return res.status(200).json({
+            success: true,
+            message: "Email verified successfully."
+        });
     };
 
 
