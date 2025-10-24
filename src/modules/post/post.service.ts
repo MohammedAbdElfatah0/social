@@ -133,6 +133,9 @@ class PostService {
             data: { postExist }
         });
     };
+    //todo hard delete post by using cron job 
+    // public hardDeletePost = async (req: Request, res: Response) => {
     
+    // }
 }
 export default new PostService();

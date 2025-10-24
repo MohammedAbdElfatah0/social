@@ -10,4 +10,7 @@ postRouter.patch("/:id", authMiddleware(), PostService.addReaction);
 postRouter.get("/:id", authMiddleware(), PostService.getSpecific);
 postRouter.delete("/:id", authMiddleware(), PostService.deletePost);
 postRouter.put("/:id", authMiddleware(), PostService.updatePost);
+postRouter.put("/:id/freeze", authMiddleware(), PostService.freezePost);
+postRouter.put("/:id/unfreeze", authMiddleware(), PostService.unfreezePost);
+// postRouter.delete("/:id/hard-delete", authMiddleware(), PostService.hardDeletePost);
 export default postRouter;
