@@ -22,6 +22,9 @@ userRouter.put("/send-otp-2verify-email",  authMiddleware(), UserService.sendOtp
 userRouter.put("/confirm-2verify-email", isValidation(userValidation.confirm2VerifyEmail), authMiddleware(), UserService.confirm2VerifyEmail);
 //endP:user/send-tag
 userRouter.put("/send-tag", isValidation(userValidation.sendTag), authMiddleware(), UserService.sendTag);
+//endP:user/:id/add-request-friends
+userRouter.post("/:id/add-request-friends", authMiddleware(), UserService.addFriendRequest);
+
 
 
 

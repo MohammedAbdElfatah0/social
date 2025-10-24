@@ -38,10 +38,12 @@ export interface IUser {
 }
 
 export interface IFriend {
-    _id: ObjectId;
+    _id?: ObjectId;
     receiver: ObjectId;
     sender: ObjectId;
     status: statusFriend;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface ISendEmailOptions {

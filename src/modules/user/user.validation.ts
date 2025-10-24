@@ -28,6 +28,5 @@ class UserValidation {
     sendTag = z.strictObject({
         idSendTag: z.string(),
     });
-    
 }
 export default new UserValidation();

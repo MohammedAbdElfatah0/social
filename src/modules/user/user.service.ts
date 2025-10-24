@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
-import { BadRequestException, comparePassword, decryptData, generateOTP, generateOtpExpiryAt, hashPassword, NotFoundException, sendEmail } from "../../utils";
+import { BadRequestException, comparePassword, decryptData, generateOTP, generateOtpExpiryAt, hashPassword, NotFoundException, sendEmail, statusFriend } from "../../utils";
 import { UserRepository } from './../../DB/models/user/user.repository';
 import { UserFactory } from "./factory";
-import { decryptPhone } from "./provider";
+import { checkUserNotBlockProvider, decryptPhone } from "./provider";
 import { UserDTO } from "./user.dto";
+import { FriendRepository } from "../../DB";
+// import { promises } from "stream";
 
 
 class UserService {
@@ -14,6 +16,7 @@ class UserService {
      * * get spicific all friends 
      */
     private readonly userRepository = new UserRepository();
+    private readonly friendRepository = new FriendRepository();
     private readonly userFactory = new UserFactory();
     public getProfileUser = async (req: Request, res: Response) => {
         const id = req.user!._id;
@@ -339,17 +342,184 @@ class UserService {
 
     };
     // add  friend to request
-    public addFriendRequest = async (req: Request, res: Response) => {}
-    //confrim add friend
-    public confirmAddFriend = async (req: Request, res: Response) => {}
+    public addFriendRequest = async (req: Request, res: Response) => {
+        //get data 2 /> 1 id user sender and id friends form params
+        const { id } = req.params;
+        const userId = req.user!._id;
+
+
+        if (userId.toString() === id!.toString()) {
+            throw new BadRequestException("You can't send friend request to yourself")
+        }
+        const userSender = await this.userRepository.findById({ _id: userId });
+        const userReceiver = await this.userRepository.findById({ _id: id });
+        if (!userSender || !userReceiver) {
+            throw new NotFoundException("not found user or deleted");
+        }
+        //check block 
+        checkUserNotBlockProvider(userReceiver, userSender);
+        //check user sender and user receiver have sent friend request to each other
+        if (userSender.friends?.includes(userReceiver._id) || userReceiver.friends?.includes(userSender._id)) {
+            throw new BadRequestException("You have already sent a friend request to this user");
+        }
+        if (userSender.sentRequests?.includes(userReceiver._id) || userReceiver.receivedRequests?.includes(userSender._id)) {
+            throw new BadRequestException("You have already sent a friend request to this user");
+        }
+        const friendRequest = {
+            receiver: userReceiver._id,
+            sender: userSender._id,
+            status: statusFriend.pending,
+
+
+        };
+        //add user receiver to user sender friend requests
+        await Promise.all(
+            [
+                //add to date base request add freinds
+                this.friendRepository.create(friendRequest),
+
+                //add to user sender and receiver 
+                //sender
+                this.userRepository.update(
+                    {
+                        _id: userSender._id
+                    }, {
+                    $push: {
+                        sentRequests: id
+                    }
+                }
+                ),
+                //receiver
+                this.userRepository.update(
+                    {
+                        _id: userReceiver._id
+                    }, {
+                    $push: {
+                        receivedRequests: userSender._id
+                    }
+                }
+                )
+
+            ]
+        );
+        //send email to user receiver
+        await sendEmail({
+            to: userReceiver.email,
+            subject: "Friend request",
+            html: `<p>${userSender.fullName} sent you a friend request</p>`
+        });
+        //return success
+        return res.status(200).json({
+            message: "Friend request sent successfully",
+            success: true
+        });
+    }
+    //confrim add friend statusFriend.accepted
+    public confirmAddFriend = async (req: Request, res: Response) => {
+
+        const { id } = req.params;
+        const userId = req.user!._id;
+
+        const [userReceiver, userSender] = await Promise.all([
+            this.userRepository.findById({ _id: userId }),
+            this.userRepository.findById({ _id: id }),
+        ]);
+
+        if (!userReceiver || !userSender) {
+            throw new NotFoundException("User not found or deleted");
+        }
+
+        const reqFriend = await this.friendRepository.exist({
+            $or: [
+                { receiver: userId, sender: id, status: statusFriend.pending },
+                { receiver: id, sender: userId, status: statusFriend.pending },
+            ],
+        });
+
+        if (!reqFriend) {
+            throw new BadRequestException("Friend request not found or already accepted");
+        }
+
+        // Check blocking
+        checkUserNotBlockProvider(userReceiver, userSender);
+
+        // Update status and friend lists
+        await Promise.all([
+            this.friendRepository.update(
+                { _id: reqFriend._id },
+                { $set: { status: statusFriend.accepted } }
+            ),
+            this.userRepository.update(
+                { _id: userReceiver._id },
+                { $push: { friends: id }, $pull: { receivedRequests: id } }
+            ),
+            this.userRepository.update(
+                { _id: userSender._id },
+                { $push: { friends: userId }, $pull: { sentRequests: userId } }
+            ),
+        ]);
+
+        return res.status(200).json({ message: "Friend request accepted successfully" });
+
+    };
+
     //remove friend
-    public removeFriend = async (req: Request, res: Response) => {}
+    public removeFriend = async (req: Request, res: Response) => {
+
+        const { id } = req.params;
+        const userId = req.user!._id;
+
+        const [userReceiver, userSender] = await Promise.all([
+            this.userRepository.findById({ _id: userId }),
+            this.userRepository.findById({ _id: id }),
+        ]);
+
+        if (!userReceiver || !userSender) {
+            throw new NotFoundException("User not found or deleted");
+        }
+
+        const reqFriend = await this.friendRepository.exist({
+            $or: [
+                { receiver: userId, sender: id },
+                { receiver: id, sender: userId },
+            ],
+        });
+
+        if (!reqFriend) {
+            throw new BadRequestException("Friend request not found");
+        }
+
+        if (reqFriend.status === statusFriend.rejected) {
+            throw new BadRequestException("Friend already removed or rejected");
+        }
+
+        await this.friendRepository.update(
+            { _id: reqFriend._id },
+            { $set: { status: statusFriend.rejected } }
+        );
+
+        if (reqFriend.status === statusFriend.accepted) {
+            await Promise.all([
+                this.userRepository.update({ _id: userReceiver._id }, { $pull: { friends: id } }),
+                this.userRepository.update({ _id: userSender._id }, { $pull: { friends: userId } }),
+            ]);
+        } else {
+            await Promise.all([
+                this.userRepository.update({ _id: userReceiver._id }, { $pull: { receivedRequests: id } }),
+                this.userRepository.update({ _id: userSender._id }, { $pull: { sentRequests: userId } }),
+            ]);
+        }
+
+        return res.sendStatus(204);
+
+    };
+
     //block friend
-    public blockFriend = async (req: Request, res: Response) => {}
+    public blockFriend = async (req: Request, res: Response) => { }
     //unblock friend
-    public unblockFriend = async (req: Request, res: Response) => {}
+    public unblockFriend = async (req: Request, res: Response) => { }
     //get all friends
-    public getAllFriends = async (req: Request, res: Response) => {}
+    public getAllFriends = async (req: Request, res: Response) => { }
 };
 
 
