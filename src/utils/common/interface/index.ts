@@ -1,26 +1,47 @@
-import { GENDER, REACTION, SYS_ROLE, USER_AGENT } from "../enum";
+import { GENDER, REACTION, statusFriend, SYS_ROLE, USER_AGENT } from "../enum";
 import { ObjectId } from "mongoose";
 
 
 export interface IUser {
     _id: ObjectId
+    //* details user
     fristName: string;
     lastName: string;
     fullName?: string;
     email: string;
     password: string;
-    credentialUpdataAt: Date;
     phoneNumber?: string;
-    role: SYS_ROLE;
     gender: GENDER;
+    //*friend details
+    friends?: ObjectId[];
+    //*blocks friends
+    blocks?: ObjectId[];
+    //*sent requests friends
+    sentRequests?: ObjectId[];
+    //*received requests friends
+    receivedRequests?: ObjectId[];
+
+    //*auth
+    credentialUpdataAt: Date;
+    role: SYS_ROLE;
     userAgent: USER_AGENT;
     otp?: string;
     otpExpiryAt?: Date;
     isVerified?: boolean;
+    //*email
     pendingEmail?: string;
+    //*2FA
     is2Verified?: boolean;
+    //*tags
     sentTags?: ObjectId[];
     receivedTags?: ObjectId[];
+}
+
+export interface IFriend {
+    _id: ObjectId;
+    receiver: ObjectId;
+    sender: ObjectId;
+    status: statusFriend;
 }
 
 export interface ISendEmailOptions {
@@ -49,7 +70,7 @@ export interface IComment {
     _id: ObjectId,
     userId: ObjectId,
     postId: ObjectId,
-    parentId: ObjectId| null,
+    parentId: ObjectId | null,
     content: string,
     attachment: IAttachment,
     reactions: IReaction[],

@@ -20,3 +20,8 @@ export enum REACTION {
     sad,
     angry,
 }
+export enum statusFriend {
+    pending,
+    accepted,
+    rejected,
+}

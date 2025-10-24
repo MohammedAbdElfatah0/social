@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { IUser, SYS_ROLE, GENDER, USER_AGENT, sendEmail, decryptData } from "../../../utils";
+import { IUser, SYS_ROLE, GENDER, USER_AGENT, sendEmail, decryptData, statusFriend } from "../../../utils";
 
 
 export const userSchema = new Schema<IUser>({
@@ -33,21 +33,45 @@ export const userSchema = new Schema<IUser>({
             return true;
         }
     },
-    credentialUpdataAt: {
-        type: Date,
-    },
+
     phoneNumber: {
         type: String
+    },
+
+    gender: {
+        type: Number,
+        enum: GENDER,
+        default: GENDER.male
+    },
+    friends: {
+        type: [Schema.Types.ObjectId],
+        ref: "User",
+    },
+    //*blocks
+    blocks: {
+        type: [Schema.Types.ObjectId],
+        ref: "User",
+    },
+    //*sent requests
+    sentRequests: {
+        type: [Schema.Types.ObjectId],
+        ref: "RequestFriend",
+        default: statusFriend.pending
+    },
+    //*received requests
+    receivedRequests: {
+        type: [Schema.Types.ObjectId],
+        ref: "User",
+        default: statusFriend.pending
+    },
+    //*auth
+    credentialUpdataAt: {
+        type: Date,
     },
     role: {
         type: Number,
         enum: SYS_ROLE,
         default: SYS_ROLE.user
-    },
-    gender: {
-        type: Number,
-        enum: GENDER,
-        default: GENDER.male
     },
     userAgent: {
         type: Number,

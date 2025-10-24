@@ -1,6 +1,6 @@
 import { model } from "mongoose";
-import { friendSchema } from "./friend.schema";
+import {  requestFriendSchema } from "./friend.schema";
 
-const friendModel = model("Friend", friendSchema);
+const requestFriendModel = model("RequestFriend", requestFriendSchema);
 
-export default friendModel;
+export default requestFriendModel;

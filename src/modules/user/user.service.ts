@@ -1,22 +1,17 @@
 import { Request, Response } from "express";
-import { UserRepository } from './../../DB/models/user/user.repository';
 import { BadRequestException, comparePassword, decryptData, generateOTP, generateOtpExpiryAt, hashPassword, NotFoundException, sendEmail } from "../../utils";
-import { UserDTO } from "./user.dto";
+import { UserRepository } from './../../DB/models/user/user.repository';
 import { UserFactory } from "./factory";
 import { decryptPhone } from "./provider";
+import { UserDTO } from "./user.dto";
 
 
 class UserService {
     /**
-     * 1-get profile user🚀
-     * 2-get profile friend🚀
-     * 3-add friend⚪
-     * 4-remove friend⚪
-     * 5-block friend⚪
-     * 6-updata info user🚀
-     * 7-update password user🚀
-     * 8-update email🚀
-     * 9-send tag🚀
+     * create datebase for request friend
+     * !add and remove friend 
+     * !block and unblock friend
+     * * get spicific all friends 
      */
     private readonly userRepository = new UserRepository();
     private readonly userFactory = new UserFactory();
@@ -343,6 +338,18 @@ class UserService {
         });
 
     };
+    // add  friend to request
+    public addFriendRequest = async (req: Request, res: Response) => {}
+    //confrim add friend
+    public confirmAddFriend = async (req: Request, res: Response) => {}
+    //remove friend
+    public removeFriend = async (req: Request, res: Response) => {}
+    //block friend
+    public blockFriend = async (req: Request, res: Response) => {}
+    //unblock friend
+    public unblockFriend = async (req: Request, res: Response) => {}
+    //get all friends
+    public getAllFriends = async (req: Request, res: Response) => {}
 };
 
 
