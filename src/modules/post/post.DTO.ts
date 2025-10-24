@@ -1,4 +1,4 @@
-export interface CreatePostDTO{
+export interface CreateOrEditPostDTO{
     content:string,
     attachment?:any[],//TODO
 }
