@@ -67,6 +67,7 @@ export interface IPost {
     content: string,
     attachment?: IAttachment[],
     reactions?: IReaction[],
+    isFreeze?:boolean,
 
 
 }
@@ -78,7 +79,8 @@ export interface IComment {
     content: string,
     attachment: IAttachment,
     reactions: IReaction[],
-    mentions?: ObjectId[]
+    mentions?: ObjectId[],
+    isFreeze?:boolean,
 };
 declare module "jsonwebtoken" {
     interface JwtPayload {

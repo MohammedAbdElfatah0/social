@@ -27,7 +27,10 @@ export const commentSchema = new Schema<IComment>(
         },
         reactions: [reactionSchema],
         //todo :: attachment
-
+        isFreeze: {
+            type: Boolean,
+            default: false
+        }
     }
     , {
         timestamps: true,

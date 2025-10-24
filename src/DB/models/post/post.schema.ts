@@ -26,6 +26,10 @@ export const postSchema = new Schema<IPost>({
     reactions: [
         reactionSchema
     ],
+    isFreeze: {
+        type: Boolean,
+        default: false
+    },
 },
     {
         timestamps: true,
