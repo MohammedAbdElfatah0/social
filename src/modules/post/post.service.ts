@@ -104,13 +104,12 @@ class PostService {
         //check are user?
         await checkUserExistWritePost(postExist, req);
         //update post from DB
-        await this.postRepository.update({ _id: id }, { isFreeze: true });
+        await this.postRepository.update({ _id: id }, { $set: { isFreeze: true } });
 
         //response
         return res.status(201).json({
             message: "Post frozen successfully",
             success: true,
-            data: { postExist }
         });
     };
     //unfreeze post
@@ -124,13 +123,12 @@ class PostService {
         //check are user?
         await checkUserExistWritePost(postExist, req);
         //update post from DB
-        await this.postRepository.update({ _id: id }, { isFreeze: false });
+        await this.postRepository.update({ _id: id }, { $set: { isFreeze: false } });
 
         //response
         return res.status(201).json({
             message: "Post unfrozen successfully",
             success: true,
-            data: { postExist }
         });
     };
     //todo hard delete post by using cron job 

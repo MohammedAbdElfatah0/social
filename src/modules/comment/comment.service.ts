@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import { addReactionProvider, IComment, IPost, NotFoundException, UnAuthorizedException } from "../../utils";
 import { CommentRepository } from './../../DB/models/comment/comment.repository';
 import { PostRepository } from './../../DB/models/post/post.repository';
-import { CreateCommentDTO, ReactionDTO } from './comment.dto';
+import { CreateOrEditCommentDTO, ReactionDTO } from './comment.dto';
 import { CommentFactoryService } from './factory/index';
+import { commentWriteByExistUser } from "./provider";
 
 class CommentService {
     private readonly PostRepository = new PostRepository();
@@ -15,7 +16,7 @@ class CommentService {
         //get data from param 
         const { postId, id } = req.params;
         console.log({ postId, id, user: req.user?._id });
-        const createCommentDTO: CreateCommentDTO = req.body;
+        const createCommentDTO: CreateOrEditCommentDTO = req.body;
         //check post exist
         let postExist = await this.PostRepository.exist({ _id: postId });
 
@@ -33,6 +34,8 @@ class CommentService {
         if (!postExist) {
             throw new NotFoundException("Not Found post");
         }
+        if (postExist.isFreeze) throw new UnAuthorizedException("post is freeze");
+        if(commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
         //prepare data for comment>>> factory
         const comment = this.commentFactoryService.createComment(
             createCommentDTO,
@@ -54,6 +57,7 @@ class CommentService {
         //check comment 
         const commentExist = await this.commentRepository.exist({ _id: id }, {}, { populate: [{ path: "replies" }] });
         if (!commentExist) throw new NotFoundException("Not Found Comment")
+
         //response 
         res.status(200).json({
             message: "comment fetch successfully",
@@ -78,18 +82,78 @@ class CommentService {
         });
         if (!commentExist) throw new NotFoundException("comment not found")
         //check are user?
-        if (
-            ![
-                commentExist.userId.toString(),
-                (commentExist.postId as unknown as IPost).userId.toString()
-            ]
-                .includes(req.user!._id.toString())) throw new UnAuthorizedException("you are not authorized to delete this comment")
+        commentWriteByExistUser(commentExist,req);
         //delete comment from DB
         await this.commentRepository.delete({ _id: id });
 
         //response
         res.sendStatus(204);
 
+    };
+    //update comment
+    public updateComment = async (req: Request, res: Response) => {
+        //get data 
+        const { id } = req.params;
+        const updateCommentDTO: CreateOrEditCommentDTO = req.body;
+        //check comment is exist?
+        const commentExist = await this.commentRepository.exist({ _id: id }, {}, {
+            populate: [{ path: "postId", select: "userId" }]
+        });
+        if (!commentExist) throw new NotFoundException("comment not found")
+        if(commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
+        //check are user?
+        commentWriteByExistUser(commentExist,req);
+        //update comment from DB
+        await this.commentRepository.update({ _id: id }, updateCommentDTO);
+
+        //response
+        res.status(200).json({
+            message: "comment updated successfully",
+            success: true,
+            data: { updateCommentDTO }
+        });
+    };
+    //freeze comment
+    public freezeComment = async (req: Request, res: Response) => {
+        //get data 
+        const { id } = req.params;
+        //check comment is exist?
+        const commentExist = await this.commentRepository.exist({ _id: id }, {}, {
+            populate: [{ path: "postId", select: "userId" }]
+        });
+        if (!commentExist) throw new NotFoundException("comment not found")
+        if(commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
+        //check are user?
+        commentWriteByExistUser(commentExist,req);
+        //update comment from DB
+        await this.commentRepository.update({ _id: id }, { isFreeze: true });
+
+        //response
+        res.status(200).json({
+            message: "comment freeze successfully",
+            success: true,
+        });
+    };
+    //unfreeze comment
+    public unfreezeComment = async (req: Request, res: Response) => {
+        //get data 
+        const { id } = req.params;
+        //check comment is exist?
+        const commentExist = await this.commentRepository.exist({ _id: id }, {}, {
+            populate: [{ path: "postId", select: "userId" }]
+        });
+        if (!commentExist) throw new NotFoundException("comment not found")
+        if(!commentExist.isFreeze) throw new UnAuthorizedException("comment is not freeze");
+        //check are user?
+        commentWriteByExistUser(commentExist,req);
+        //update comment from DB
+        await this.commentRepository.update({ _id: id }, { isFreeze: false });
+
+        //response
+        res.status(200).json({
+            message: "comment unfreeze successfully",
+            success: true,
+        });
     };
 }
 

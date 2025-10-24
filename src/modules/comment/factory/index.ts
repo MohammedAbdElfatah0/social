@@ -1,10 +1,10 @@
-import { CreateCommentDTO } from "../comment.dto";
+import { CreateOrEditCommentDTO } from "../comment.dto";
 import { CommentEntity } from "../entity";
 import { IUser, IPost, IComment } from './../../../utils/common/interface/index';
 
 export class CommentFactoryService {
     createComment(
-        createCommentDTO: CreateCommentDTO,
+        createCommentDTO: CreateOrEditCommentDTO,
         user: IUser,
         post: IPost,
         comment: IComment

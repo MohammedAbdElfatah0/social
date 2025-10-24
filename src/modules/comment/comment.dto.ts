@@ -1,4 +1,4 @@
-export interface CreateCommentDTO {
+export interface CreateOrEditCommentDTO {
     content: string,
     attachment: any,//TODO
 }
