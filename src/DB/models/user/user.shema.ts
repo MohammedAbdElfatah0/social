@@ -52,6 +52,11 @@ export const userSchema = new Schema<IUser>({
         type: [Schema.Types.ObjectId],
         ref: "User",
     },
+    //*blockBy
+    blockedBy: {
+        type: [Schema.Types.ObjectId],
+        ref: "User",
+    },
     //*sent requests
     sentRequests: {
         type: [Schema.Types.ObjectId],

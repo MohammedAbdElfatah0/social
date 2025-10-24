@@ -525,11 +525,105 @@ class UserService {
     };
 
     //block friend
-    public blockFriend = async (req: Request, res: Response) => { }
+    public blockFriend = async (req: Request, res: Response) => {
+
+        const { id } = req.params; // الشخص اللي هيتم حظره
+        const userId = req.user!._id; // المستخدم الحالي
+
+        if (id === userId.toString()) {
+            throw new BadRequestException("You cannot block yourself");
+        }
+
+        const [user, targetUser] = await Promise.all([
+            this.userRepository.findById({ _id: userId }),
+            this.userRepository.findById({ _id: id }),
+        ]);
+
+        if (!user || !targetUser) {
+            throw new NotFoundException("User not found or deleted");
+        }
+
+        // لو الشخص محظور بالفعل
+        if (user.blocks?.includes(targetUser._id)) {
+            throw new BadRequestException("User already blocked");
+        }
+
+        // احذف أي علاقة صداقة أو طلب
+        await Promise.all([
+            this.friendRepository.deleteMany({
+                $or: [
+                    { receiver: userId, sender: id },
+                    { receiver: id, sender: userId },
+                ],
+            }),
+            this.userRepository.update({ _id: userId }, {
+                $pull: { friends: id, receivedRequests: id, sentRequests: id },
+                $push: { blocks: id },
+            }),
+            this.userRepository.update({ _id: id }, {
+                $pull: { friends: userId, receivedRequests: userId, sentRequests: userId },
+                // ممكن تضيف لو عاوز:
+                $push: { blockedBy: userId }
+            }),
+        ]);
+
+        return res.status(200).json({ message: "User blocked successfully" });
+
+    };
+
     //unblock friend
-    public unblockFriend = async (req: Request, res: Response) => { }
+    public unblockFriend = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const userId = req.user!._id;
+
+        const [user, targetUser] = await Promise.all([
+            this.userRepository.findById({ _id: userId }),
+            this.userRepository.findById({ _id: id }),
+        ]);
+
+        if (!user || !targetUser) {
+            throw new NotFoundException("User not found or deleted");
+        }
+
+        if (!user.blocks?.includes(targetUser._id)) {
+            throw new BadRequestException("User is not blocked");
+        }
+
+        await Promise.all([
+            this.userRepository.update(
+                { _id: userId },
+                { $pull: { blocks: id } }
+            ),
+
+            this.userRepository.update(
+                { _id: id },
+                { $pull: { blockedBy: userId } }
+            )]);
+
+        return res.status(200).json({ message: "User unblocked successfully" });
+
+    };
+
     //get all friends
-    public getAllFriends = async (req: Request, res: Response) => { }
+    public getAllFriends = async (req: Request, res: Response) => {
+        const userId = req.user!._id;
+
+        const user = await this.userRepository.exist({ _id: userId }, {}, { populate: { path: "friends", select: "fullName fristName lastName " } })
+
+        if (!user) {
+            throw new NotFoundException("User not found or deleted");
+        }
+
+        console.log(user.friends); // ⬅️ شوف بيرجع IDs ولا Users
+
+        return res.status(200).json({
+            message: "all friends",
+            success: true,
+            friends: user.friends
+        });
+    };
+
+
 };
 
 

@@ -54,4 +54,10 @@ export abstract class AbstractRepository<T> {
     ) {
         return await this.model.deleteOne(filter, options);
     }
+     async deleteMany(
+        filter: RootFilterQuery<T>,
+        options?: MongooseBaseQueryOptions<T>
+    ) {
+        return await this.model.deleteMany(filter, options);
+    }
 }

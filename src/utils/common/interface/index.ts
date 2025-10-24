@@ -16,6 +16,8 @@ export interface IUser {
     friends?: ObjectId[];
     //*blocks friends
     blocks?: ObjectId[];
+    //*blockedBy
+    blockedBy?: ObjectId[];
     //*sent requests friends
     sentRequests?: ObjectId[];
     //*received requests friends

@@ -28,6 +28,13 @@ userRouter.post("/:id/add-request-friends", authMiddleware(), UserService.addFri
 userRouter.put("/:id/confirm-add-friend", authMiddleware(), UserService.confirmAddFriend);
 //endP:user/:id/remove-friend
 userRouter.delete("/:id/remove-friend", authMiddleware(), UserService.removeFriend);
+//endP:user/:id/block-user
+userRouter.put("/:id/block-user", authMiddleware(), UserService.blockFriend);
+//endP:user/:id/unblock-user
+userRouter.delete("/:id/unblock-user", authMiddleware(), UserService.unblockFriend);
+//endP:user/:id/get-all-friends
+userRouter.get("/get-all-friends", authMiddleware(), UserService.getAllFriends);
+
 
 
 
