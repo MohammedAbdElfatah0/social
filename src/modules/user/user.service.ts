@@ -419,42 +419,41 @@ class UserService {
 
         const { id } = req.params;
         const userId = req.user!._id;
+        console.log({ id, userId });
+        const [userReceiverExist, userSenderExist] = await Promise.all([
+            this.friendRepository.exist({ receiver: userId }),
+            this.friendRepository.exist({ sender: id }),
+        ]);
+        console.log({ userReceiverExist, userSenderExist })
+
+        if (!userReceiverExist || !userSenderExist) {
+            throw new NotFoundException("User not found or deleted");
+        }
+        if (userReceiverExist.status === statusFriend.accepted || userSenderExist.status === statusFriend.accepted) {
+            throw new BadRequestException("Friends request  accepted realy");
+        }
 
         const [userReceiver, userSender] = await Promise.all([
             this.userRepository.findById({ _id: userId }),
             this.userRepository.findById({ _id: id }),
+
         ]);
 
-        if (!userReceiver || !userSender) {
-            throw new NotFoundException("User not found or deleted");
-        }
-
-        const reqFriend = await this.friendRepository.exist({
-            $or: [
-                { receiver: userId, sender: id, status: statusFriend.pending },
-                { receiver: id, sender: userId, status: statusFriend.pending },
-            ],
-        });
-
-        if (!reqFriend) {
-            throw new BadRequestException("Friend request not found or already accepted");
-        }
-
         // Check blocking
-        checkUserNotBlockProvider(userReceiver, userSender);
+        checkUserNotBlockProvider(userReceiver!, userSender!);
 
         // Update status and friend lists
         await Promise.all([
             this.friendRepository.update(
-                { _id: reqFriend._id },
+                { _id: userReceiverExist._id },
                 { $set: { status: statusFriend.accepted } }
             ),
             this.userRepository.update(
-                { _id: userReceiver._id },
+                { _id: userId },//sender
                 { $push: { friends: id }, $pull: { receivedRequests: id } }
             ),
             this.userRepository.update(
-                { _id: userSender._id },
+                { _id: id },//receiver
                 { $push: { friends: userId }, $pull: { sentRequests: userId } }
             ),
         ]);
@@ -477,13 +476,24 @@ class UserService {
         if (!userReceiver || !userSender) {
             throw new NotFoundException("User not found or deleted");
         }
-
+        //there problem controller state conver it status to rejected 
+        //who send request to who?
+        console.log({ userId, id });
         const reqFriend = await this.friendRepository.exist({
             $or: [
-                { receiver: userId, sender: id },
-                { receiver: id, sender: userId },
+                {
+                    receiver: userReceiver._id,
+                    sender: userSender._id,
+                    status: { $in: [statusFriend.pending, statusFriend.accepted] }
+                },
+                {
+                    receiver: userSender._id,
+                    sender: userReceiver._id,
+                    status: { $in: [statusFriend.pending, statusFriend.accepted] }
+                },
             ],
         });
+        console.log({ reqFriend });
 
         if (!reqFriend) {
             throw new BadRequestException("Friend request not found");

@@ -24,6 +24,11 @@ userRouter.put("/confirm-2verify-email", isValidation(userValidation.confirm2Ver
 userRouter.put("/send-tag", isValidation(userValidation.sendTag), authMiddleware(), UserService.sendTag);
 //endP:user/:id/add-request-friends
 userRouter.post("/:id/add-request-friends", authMiddleware(), UserService.addFriendRequest);
+//endP:user/:id/confirm-add-friend
+userRouter.put("/:id/confirm-add-friend", authMiddleware(), UserService.confirmAddFriend);
+//endP:user/:id/remove-friend
+userRouter.delete("/:id/remove-friend", authMiddleware(), UserService.removeFriend);
+
 
 
 
