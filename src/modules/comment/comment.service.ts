@@ -35,7 +35,7 @@ class CommentService {
             throw new NotFoundException("Not Found post");
         }
         if (postExist.isFreeze) throw new UnAuthorizedException("post is freeze");
-        if (commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
+        if (commentExist?.isFreeze) throw new UnAuthorizedException("comment is freeze");
         //prepare data for comment>>> factory
         const comment = this.commentFactoryService.createComment(
             createCommentDTO,

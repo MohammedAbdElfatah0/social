@@ -2,6 +2,7 @@ import { Schema } from "mongoose";
 import { IPost } from "../../../utils";
 import { reactionSchema } from "../../common";
 import { Comment } from "../comment/comment.model";
+import { Post } from "./post.model";
 
 
 
@@ -44,6 +45,9 @@ postSchema.virtual("comments", {
 })
 postSchema.pre("deleteOne", async function (next) {
     const filter = typeof this.getFilter == "function" ? this.getFilter() : {};
-    await Comment.deleteMany({ postId: filter._id });
+    console.log(filter);
+    const postExist = await Post.findOne(filter);
+    console.log(postExist);
+    await Comment.deleteMany({ postId: postExist?._id });
     next();
 });

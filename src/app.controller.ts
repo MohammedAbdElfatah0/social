@@ -2,6 +2,7 @@ import { Express, NextFunction, Request, Response } from "express"
 import { authRouter, commentRouter, postRouter, userRouter } from "./modules";
 import { connectDB } from "./DB";
 import { AppError } from "./utils";
+import CronService from "./utils/cron";
 export const bootstrap = (app: Express, express: any) => {
     app.use(express.json());
     connectDB();
@@ -10,7 +11,8 @@ export const bootstrap = (app: Express, express: any) => {
     app.use("/comment", commentRouter);
     app.use("/post", postRouter);
     //message
-
+//cron job
+    CronService.job.start();
     //*invalid route
     app.use("/{*dummy}", (req: Request, res: Response, next: NextFunction) => {
         res.status(400).json({
