@@ -17,13 +17,15 @@ userRouter.put("/update-email", isValidation(userValidation.editEmail), authMidd
 //endP:user/confirm-update-email
 userRouter.put("/confirm-update-email", isValidation(userValidation.confirmEditEmail), authMiddleware(), UserService.confirmEditEmail);
 //endP:user/send-otp-2verify-email
-userRouter.put("/send-otp-2verify-email",  authMiddleware(), UserService.sendOtp2verifyEmail);
+userRouter.put("/send-otp-2verify-email", authMiddleware(), UserService.sendOtp2verifyEmail);
 //endP:user/confirm-2verify-email
 userRouter.put("/confirm-2verify-email", isValidation(userValidation.confirm2VerifyEmail), authMiddleware(), UserService.confirm2VerifyEmail);
 //endP:user/send-tag
 userRouter.put("/send-tag", isValidation(userValidation.sendTag), authMiddleware(), UserService.sendTag);
 //endP:user/:id/add-request-friends
 userRouter.post("/:id/add-request-friends", authMiddleware(), UserService.addFriendRequest);
+//endP:user/:id/delete-request-friends
+userRouter.delete("/:id/delete-request-friends", authMiddleware(), UserService.deleteFriendRequest);
 //endP:user/:id/confirm-add-friend
 userRouter.put("/:id/confirm-add-friend", authMiddleware(), UserService.confirmAddFriend);
 //endP:user/:id/remove-friend

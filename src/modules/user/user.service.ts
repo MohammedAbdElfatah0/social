@@ -414,6 +414,27 @@ class UserService {
             success: true
         });
     }
+    //delete friend to request
+    public deleteFriendRequest = async (req: Request, res: Response) => {
+        const userId = req.user!._id;
+        const { id } = req.params;
+        //check request frindes is exist
+        const userSenderExist = await this.friendRepository.exist({ sender: userId });
+        const userReceiverExist = await this.friendRepository.exist({ receiver: id });
+        console.log({ userSenderExist, userReceiverExist })
+        if (!userSenderExist || !userReceiverExist) {
+            throw new NotFoundException("not found user or deleted");
+        }
+        await this.friendRepository.delete({ sender: userId });
+        await this.userRepository.update({ _id: userId }, { $pull: { sentRequests: id } });
+        await this.userRepository.update({ _id: id }, { $pull: { receivedRequests: userId } });
+        return res.status(200).json({
+            message: "Friend request deleted successfully",
+            success: true
+        });
+
+
+    }
     //confrim add friend statusFriend.accepted
     public confirmAddFriend = async (req: Request, res: Response) => {
 
