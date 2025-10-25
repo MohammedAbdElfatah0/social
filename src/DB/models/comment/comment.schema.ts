@@ -30,7 +30,9 @@ export const commentSchema = new Schema<IComment>(
         isFreeze: {
             type: Boolean,
             default: false
-        }
+        },
+        freezeAt: Date,
+
     }
     , {
         timestamps: true,

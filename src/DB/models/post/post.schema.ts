@@ -30,6 +30,7 @@ export const postSchema = new Schema<IPost>({
         type: Boolean,
         default: false
     },
+    freezeAt: Date,
 },
     {
         timestamps: true,
