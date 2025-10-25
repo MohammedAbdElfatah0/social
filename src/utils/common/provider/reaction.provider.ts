@@ -1,17 +1,16 @@
-import { NotFoundException } from "../..";
+import { NotFoundException, UnAuthorizedException } from "../..";
 import { CommentRepository, PostRepository } from "../../../DB";
 import { ReactionDTO } from "../../../modules/post/post.DTO";
 import { IComment, IPost } from "../interface";
 
 export const addReactionProvider = async (repo: CommentRepository | PostRepository, reaction: ReactionDTO) => {
-    const postExist = await repo.exist({ _id: reaction.id });
-    console.log(postExist)
-    if (!postExist)
+    const itemExist = await repo.exist({ _id: reaction.id });
+    if (!itemExist)
         throw new NotFoundException("Post not found");
+   if(itemExist.isFreeze) throw new UnAuthorizedException("pls make it unfreeze first");
     //check reaction is exist
-    let reactionIndex = postExist.reactions!.findIndex((reactions) => reactions.userId.toString() === reaction.userId);
+    let reactionIndex = itemExist.reactions!.findIndex((reactions) => reactions.userId.toString() === reaction.userId);
     if (reactionIndex == -1) {
-        console.log("reaction not exist")
         await repo.update(
             { _id: reaction.id },
             {
@@ -32,7 +31,7 @@ export const addReactionProvider = async (repo: CommentRepository | PostReposito
 
             },
             {
-                $pull: { reactions: postExist.reactions?.[reactionIndex] }
+                $pull: { reactions: itemExist.reactions?.[reactionIndex] }
             })
 
     }

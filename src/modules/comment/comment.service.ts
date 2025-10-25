@@ -35,7 +35,7 @@ class CommentService {
             throw new NotFoundException("Not Found post");
         }
         if (postExist.isFreeze) throw new UnAuthorizedException("post is freeze");
-        if(commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
+        if (commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
         //prepare data for comment>>> factory
         const comment = this.commentFactoryService.createComment(
             createCommentDTO,
@@ -57,7 +57,8 @@ class CommentService {
         //check comment 
         const commentExist = await this.commentRepository.exist({ _id: id }, {}, { populate: [{ path: "replies" }] });
         if (!commentExist) throw new NotFoundException("Not Found Comment")
-
+        //check freeze
+        if (commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
         //response 
         res.status(200).json({
             message: "comment fetch successfully",
@@ -68,11 +69,12 @@ class CommentService {
     public addReaction = async (req: Request, res: Response) => {
         //get data -> params body req.user
         const reactionDTO: ReactionDTO = { ...req.params, userId: req.user!._id.toString(), ...req.body };
+        //check comment is exist?
         addReactionProvider(this.commentRepository, reactionDTO);
         //sent response 
         return res.sendStatus(204);
     };
-
+//delete comment hard
     public deleteComment = async (req: Request, res: Response) => {
         //get data 
         const { id } = req.params;
@@ -82,7 +84,7 @@ class CommentService {
         });
         if (!commentExist) throw new NotFoundException("comment not found")
         //check are user?
-        commentWriteByExistUser(commentExist,req);
+        commentWriteByExistUser(commentExist, req);
         //delete comment from DB
         await this.commentRepository.delete({ _id: id });
 
@@ -100,9 +102,9 @@ class CommentService {
             populate: [{ path: "postId", select: "userId" }]
         });
         if (!commentExist) throw new NotFoundException("comment not found")
-        if(commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
+        if (commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
         //check are user?
-        commentWriteByExistUser(commentExist,req);
+        commentWriteByExistUser(commentExist, req);
         //update comment from DB
         await this.commentRepository.update({ _id: id }, updateCommentDTO);
 
@@ -122,11 +124,13 @@ class CommentService {
             populate: [{ path: "postId", select: "userId" }]
         });
         if (!commentExist) throw new NotFoundException("comment not found")
-        if(commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
+        if (commentExist.isFreeze) throw new UnAuthorizedException("comment is freeze");
         //check are user?
-        commentWriteByExistUser(commentExist,req);
+        commentWriteByExistUser(commentExist, req);
         //update comment from DB
-        await this.commentRepository.update({ _id: id }, { isFreeze: true });
+        const freezeAt = new Date();
+        freezeAt.setHours(freezeAt.getHours() + 24);
+        await this.commentRepository.update({ _id: id }, { isFreeze: true ,freezeAt: freezeAt});
 
         //response
         res.status(200).json({
@@ -143,11 +147,11 @@ class CommentService {
             populate: [{ path: "postId", select: "userId" }]
         });
         if (!commentExist) throw new NotFoundException("comment not found")
-        if(!commentExist.isFreeze) throw new UnAuthorizedException("comment is not freeze");
+        if (!commentExist.isFreeze) throw new UnAuthorizedException("comment is not freeze");
         //check are user?
-        commentWriteByExistUser(commentExist,req);
+        commentWriteByExistUser(commentExist, req);
         //update comment from DB
-        await this.commentRepository.update({ _id: id }, { isFreeze: false });
+        await this.commentRepository.update({ _id: id }, { isFreeze: false,freezeAt: null });
 
         //response
         res.status(200).json({

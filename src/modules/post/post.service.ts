@@ -27,10 +27,12 @@ class PostService {
     public addReaction = async (req: Request, res: Response) => {
         //get data -> params body req.user
         const reactionDTO: ReactionDTO = { ...req.params, userId: req.user!._id.toString(), ...req.body };
+        //check post is exist?
         addReactionProvider(this.postRepository, reactionDTO);
         //sent response 
         return res.sendStatus(204);
     };
+    //get specific post bu id 
     public getSpecific = async (req: Request, res: Response) => {
         //get data
         const { id } = req.params;
@@ -55,7 +57,7 @@ class PostService {
         });
     };
 
-
+    //hard delete post
     public deletePost = async (req: Request, res: Response) => {
         //get data 
         const { id } = req.params;
@@ -79,7 +81,7 @@ class PostService {
         //check post is exist?
         const postExist = await this.postRepository.exist({ _id: id },);
         if (!postExist) throw new NotFoundException("post not found")
-        console.log(postExist.isFreeze);
+        //check freeze
         if (postExist.isFreeze) throw new UnAuthorizedException("you are not authorized to update this post")
         //check are user?
         await checkUserExistWritePost(postExist, req);
@@ -104,7 +106,10 @@ class PostService {
         //check are user?
         await checkUserExistWritePost(postExist, req);
         //update post from DB
-        await this.postRepository.update({ _id: id }, { $set: { isFreeze: true } });
+        //freeze for 24 hours
+        const freezeAt = new Date();
+        freezeAt.setHours(freezeAt.getHours() + 24);
+        await this.postRepository.update({ _id: id }, { $set: { isFreeze: true, freezeAt: freezeAt } });
 
         //response
         return res.status(201).json({
@@ -123,7 +128,7 @@ class PostService {
         //check are user?
         await checkUserExistWritePost(postExist, req);
         //update post from DB
-        await this.postRepository.update({ _id: id }, { $set: { isFreeze: false } });
+        await this.postRepository.update({ _id: id }, { $set: { isFreeze: false, freezeAt: null } });
 
         //response
         return res.status(201).json({
@@ -131,9 +136,5 @@ class PostService {
             success: true,
         });
     };
-    //todo hard delete post by using cron job 
-    // public hardDeletePost = async (req: Request, res: Response) => {
-    
-    // }
 }
 export default new PostService();
