@@ -28,5 +28,25 @@ class UserValidation {
     sendTag = z.strictObject({
         idSendTag: z.string(),
     });
+    paramasId = z.string().regex(/^[0-9a-fA-F]{24}$/);
+    addFriendRequest = z.strictObject({
+        id: this.paramasId
+    });
+    deleteFriendRequest = z.strictObject({
+        id: this.paramasId
+    });
+    confirmAddFriend = z.strictObject({
+        id: this.paramasId
+    });
+    removeFriend = z.strictObject({
+        id: this.paramasId
+    });
+    blockFriend = z.strictObject({
+        id: this.paramasId
+    });
+    unblockFriend = z.strictObject({
+        id: this.paramasId
+    });
+
 }
 export default new UserValidation();

@@ -23,19 +23,19 @@ userRouter.put("/confirm-2verify-email", isValidation(userValidation.confirm2Ver
 //endP:user/send-tag
 userRouter.put("/send-tag", isValidation(userValidation.sendTag), authMiddleware(), UserService.sendTag);
 //endP:user/:id/add-request-friends
-userRouter.post("/:id/add-request-friends", authMiddleware(), UserService.addFriendRequest);
+userRouter.post("/:id/add-request-friends", isValidation(userValidation.addFriendRequest), authMiddleware(), UserService.addFriendRequest);
 //endP:user/:id/delete-request-friends
-userRouter.delete("/:id/delete-request-friends", authMiddleware(), UserService.deleteFriendRequest);
+userRouter.delete("/:id/delete-request-friends", isValidation(userValidation.deleteFriendRequest), authMiddleware(), UserService.deleteFriendRequest);
 //endP:user/:id/confirm-add-friend
-userRouter.put("/:id/confirm-add-friend", authMiddleware(), UserService.confirmAddFriend);
+userRouter.put("/:id/confirm-add-friend", isValidation(userValidation.confirmAddFriend), authMiddleware(), UserService.confirmAddFriend);
 //endP:user/:id/remove-friend
-userRouter.delete("/:id/remove-friend", authMiddleware(), UserService.removeFriend);
+userRouter.delete("/:id/remove-friend", isValidation(userValidation.removeFriend), authMiddleware(), UserService.removeFriend);
 //endP:user/:id/block-user
-userRouter.put("/:id/block-user", authMiddleware(), UserService.blockFriend);
+userRouter.put("/:id/block-user", isValidation(userValidation.blockFriend), authMiddleware(), UserService.blockFriend);
 //endP:user/:id/unblock-user
-userRouter.delete("/:id/unblock-user", authMiddleware(), UserService.unblockFriend);
-//endP:user/:id/get-all-friends
-userRouter.get("/get-all-friends", authMiddleware(), UserService.getAllFriends);
+userRouter.delete("/:id/unblock-user", isValidation(userValidation.unblockFriend), authMiddleware(), UserService.unblockFriend);
+//endP:user/get-all-friends
+userRouter.get("/get-all-friends",  authMiddleware(), UserService.getAllFriends);
 
 
 
