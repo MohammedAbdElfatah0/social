@@ -10,58 +10,49 @@ class PostValidation {
   });
 
   // ✅ 3. create post (body)
- public createPostBody = z.object({
-    userId: this.paramId,
-    reaction: z.number().optional(),
+  public createPostBody = z.object({
+    content: z.string().min(1).max(500),
   });
 
   // ✅ 4. reaction (params + body)
- public addReaction = {
+  public addReaction = {
     params: z.object({ id: this.paramId }),
-    body: z.object({
-      userId: this.paramId,
-      reaction: z.number().optional(),
-    }),
+
   };
 
   // ✅ 5. get specific post (params)
- public getSpecific = {
+  public getSpecific = {
     params: z.object({ id: this.paramId }),
     query: z.object({
       userId: this.paramId.optional(),
     }),
-  };        
+  };
 
   // ✅ 6. delete / update / freeze / etc.
- public modifyPost = {
+  public modifyPost = {
     params: z.object({ id: this.paramId }),
     body: z.object({ userId: this.paramId }),
   };
 
-public deletePost = {
+  public deletePost = {
     params: z.object({ id: this.paramId }),
-    body: z.object({ userId: this.paramId }),
+
   };
 
-public updatePost = {
+  public updatePost = {
     params: z.object({ id: this.paramId }),
-    body: z.object({ userId: this.paramId }),
+    body: z.object({ content: z.string().min(1).max(500), }),
   };
 
-public freezePost = {
+  public freezePost = {
     params: z.object({ id: this.paramId }),
-    body: z.object({ userId: this.paramId }),
   };
 
-public unfreezePost = {
+  public unfreezePost = {
     params: z.object({ id: this.paramId }),
-    body: z.object({ userId: this.paramId }),
   };
 
-public hardDeletePost = {
-    params: z.object({ id: this.paramId }),
-    body: z.object({ userId: this.paramId }),
-  };
+  
 
 }
 
