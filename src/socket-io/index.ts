@@ -15,8 +15,8 @@ export const initServer = (server: HttpServer) => {
     io.use(SocketAuthMiddleware);
     console.log("socket io" );
     io.on("connection", (socket: Socket) => {
+        connectedUser.set(socket.data.user._id.toString(), socket.id);
         console.log({ connectedUser });
-        connectedUser.set(socket.data.user._id, socket.id);
         socket.on("sendMessage", sendMessage(socket, io, connectedUser));
     });
 }
