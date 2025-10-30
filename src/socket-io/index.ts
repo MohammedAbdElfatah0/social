@@ -5,7 +5,7 @@ import { sendMessage } from "./chat";
 export const initServer = (server: HttpServer) => {
 
     const connectedUser = new Map<string, string>();
-
+    console.log("socket io");
     const io = new Server(server, {
         cors: {
             origin: "*",
@@ -13,9 +13,10 @@ export const initServer = (server: HttpServer) => {
     });
     //auth middleware for checking user authentication
     io.use(SocketAuthMiddleware);
+    console.log("socket io" );
     io.on("connection", (socket: Socket) => {
         console.log({ connectedUser });
         connectedUser.set(socket.data.user._id, socket.id);
-        socket.on("sendMessage", sendMessage(socket, io, connectedUser))
+        socket.on("sendMessage", sendMessage(socket, io, connectedUser));
     });
 }

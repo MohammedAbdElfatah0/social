@@ -6,7 +6,7 @@ export abstract class AbstractRepository<T> {
 
     async create(item: T): Promise<T & Document> {
         const doc = new this.model(item);
-        return await doc.save() as unknown as T & Document;
+        return await doc.save() as unknown as Promise<T & Document>;
     }
 
     async exist(

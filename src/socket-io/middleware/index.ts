@@ -3,6 +3,7 @@ import { NotFoundException, verifyToken } from "../../utils";
 import { UserRepository } from "../../DB";
 
 export const SocketAuthMiddleware = async (socket: Socket, next: Function) => {
+    console.log(socket.handshake.auth);
     const { token } = socket.handshake.auth;
     if (!token) {
         return next(new Error("Authentication error"));

@@ -18,6 +18,7 @@ export const bootstrap = (app: Express, express: any) => {
     //message
     //cron job
     CronService.job.start();
+    
     //*invalid route
     app.use("/{*dummy}", (req: Request, res: Response, next: NextFunction) => {
         res.status(400).json({
