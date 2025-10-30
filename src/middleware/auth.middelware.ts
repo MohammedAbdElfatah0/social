@@ -20,9 +20,10 @@ export const authMiddleware = () => {
             token
         });
         const userRepository = new UserRepository();
-        const user = await userRepository.exist({
-            _id: payload.id,
-        });
+        const user = await userRepository.exist(
+            {
+                _id: payload.id,
+            });
         if (!user) {
             throw new NotFoundException("User not found");
         }

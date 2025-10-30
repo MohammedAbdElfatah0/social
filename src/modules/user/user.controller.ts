@@ -5,9 +5,9 @@ import userValidation from "./user.validation";
 
 const userRouter = Router();
 //endP:user/id/profile/user
-userRouter.get("/:id/profile-user",isValidation(userValidation.paramasId.params), authMiddleware(), UserService.getProfileFriend);
+userRouter.get("/:id/profile-user",isValidation(userValidation.paramasId), authMiddleware(), UserService.getProfileFriend);
 //endP:user/profile-user
-userRouter.get("/profile-user", authMiddleware(), UserService.getProfileUser);
+userRouter.get("/profile", authMiddleware(), UserService.getProfileUser);
 //endP:user/update-info-user
 userRouter.put("/update-info-user", isValidation(userValidation.updateInfoUser.body), authMiddleware(), UserService.updateInfoUser);
 //endP:user/reset-password

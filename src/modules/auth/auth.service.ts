@@ -142,7 +142,7 @@ class AuthService {
         return res.status(200).json({
             message: "User logged in successfully",
             success: true,
-            token: {
+            data: {
                 accessToken,
                 refreshToken
             }

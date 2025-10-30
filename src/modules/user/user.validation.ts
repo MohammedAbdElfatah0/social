@@ -1,10 +1,6 @@
 import z from "zod";
 class UserValidation {
-    paramasId = {
-        params: z.object({
-            id: z.string().regex(/^[0-9a-fA-F]{24}$/),
-        })
-    };
+    paramasId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ID");
 
     updateInfoUser = {
         body: z.strictObject({
@@ -48,34 +44,35 @@ class UserValidation {
         })
     };
     addFriendRequest = {
-        params: z.strictObject({
-            id: this.paramasId
-        })
+        params: z.object({
+            id: this.paramasId,
+        }),
     };
     deleteFriendRequest = {
-        params: z.strictObject({
-            id: this.paramasId
+        params: z.object({
+            id: this.paramasId,
         })
     };
     confirmAddFriend = {
-        params: z.strictObject({
-            id: this.paramasId
+        params: z.object({
+            id: this.paramasId,
         })
     };
     removeFriend = {
-        params: z.strictObject({
-            id: this.paramasId
+        params: z.object({
+            id: this.paramasId,
         })
     };
     blockFriend = {
-        params: z.strictObject({
-            id: this.paramasId
+        params: z.object({
+            id: this.paramasId,
         })
     };
     unblockFriend = {
-        params: z.strictObject({
-            id: this.paramasId
+        params: z.object({
+            id: this.paramasId,
         })
+
     };
 
 }

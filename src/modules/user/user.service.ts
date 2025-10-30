@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import { BadRequestException, comparePassword, decryptData, generateOTP, generateOtpExpiryAt, hashPassword, NotFoundException, sendEmail, statusFriend } from "../../utils";
+import { BadRequestException, comparePassword, decryptData, generateOTP, generateOtpExpiryAt, hashPassword, IUser, NotFoundException, sendEmail, statusFriend } from "../../utils";
 import { UserRepository } from './../../DB/models/user/user.repository';
 import { UserFactory } from "./factory";
 import { checkUserNotBlockProvider, decryptPhone } from "./provider";
 import { UserDTO } from "./user.dto";
 import { FriendRepository } from "../../DB";
+import { User } from "../../DB/models/user/user.model";
 // import { promises } from "stream";
 
 
@@ -22,12 +23,13 @@ class UserService {
         const id = req.user!._id;
 
         // Get full user document, not just existence
-        const userExist = await this.userRepository.findById(id);
+        const userExist = await this.userRepository.exist({ _id: id }, {}, { populate: [{ path: "user", select: "fullName" }] });
         if (!userExist) throw new NotFoundException("not found user or deleted")
-
+        const friends = await User.populate(userExist, [{ path: "friends", select: "fullName  lastName fristName" }]);
+        // console.log(friends);
         // Decrypt for display only
         const userToShow = decryptPhone(userExist);
-
+        console.log(userToShow);
         res.status(200).json({
             message: "Successfully fetched user profile",
             success: true,
@@ -445,7 +447,6 @@ class UserService {
             this.friendRepository.exist({ receiver: userId }),
             this.friendRepository.exist({ sender: id }),
         ]);
-        console.log({ userReceiverExist, userSenderExist })
 
         if (!userReceiverExist || !userSenderExist) {
             throw new NotFoundException("User not found or deleted");

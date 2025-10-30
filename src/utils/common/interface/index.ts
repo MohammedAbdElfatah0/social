@@ -67,8 +67,8 @@ export interface IPost {
     content: string,
     attachment?: IAttachment[],
     reactions?: IReaction[],
-    isFreeze?:boolean,
-    freezeAt?:Date,
+    isFreeze?: boolean,
+    freezeAt?: Date,
 
 
 }
@@ -81,9 +81,22 @@ export interface IComment {
     attachment: IAttachment,
     reactions: IReaction[],
     mentions?: ObjectId[],
-    isFreeze?:boolean,
-    freezeAt?:Date,
+    isFreeze?: boolean,
+    freezeAt?: Date,
 };
+export interface IMessage {
+    readonly _id: ObjectId,
+    content: string,
+    sender: ObjectId[],
+    attachment?: IAttachment[],
+    reactions?: IReaction[],
+}
+export interface IChat {
+    readonly _id: ObjectId,
+    messages: ObjectId[],
+    users: ObjectId[],
+
+}
 declare module "jsonwebtoken" {
     interface JwtPayload {
         _id: ObjectId;

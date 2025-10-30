@@ -1,4 +1,4 @@
-import { Document, Model, MongooseBaseQueryOptions, MongooseUpdateQueryOptions, ProjectionType, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
+import { Document, Model, MongooseBaseQueryOptions, MongooseUpdateQueryOptions, PopulateOptions, ProjectionType, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
 
 export abstract class AbstractRepository<T> {
     constructor(protected model: Model<T>) {
@@ -14,7 +14,16 @@ export abstract class AbstractRepository<T> {
         projection?: ProjectionType<T>,
         options?: QueryOptions<T>
     ) {
-        return await this.model.findOne(filter, projection, options);
+        return await this.model.findOne(filter, projection);
+    }
+    async existPopulate(
+        filter: RootFilterQuery<T>,
+        projection?: ProjectionType<T>,
+        options?: QueryOptions<T> & {populate?: PopulateOptions}
+    ) {
+        //        const friends = await User.populate(userExist, [{ path: "friends", select: "fullName" }]);
+
+        return await this.model.findOne(filter, projection).populate(options?.populate as PopulateOptions);
     }
     async findById(
         filter: RootFilterQuery<T>,
@@ -39,7 +48,7 @@ export abstract class AbstractRepository<T> {
     ) {
         return await this.model.updateOne(filter, update, options);
     }
-    
+
     async findByIdAndUpdate(
         filter: RootFilterQuery<T>,
         update: UpdateQuery<T>,
@@ -47,14 +56,14 @@ export abstract class AbstractRepository<T> {
     ) {
         return await this.model.findByIdAndUpdate(filter, update, options);
     }
-    
+
     async delete(
         filter: RootFilterQuery<T>,
         options?: MongooseBaseQueryOptions<T>
     ) {
         return await this.model.deleteOne(filter, options);
     }
-     async deleteMany(
+    async deleteMany(
         filter: RootFilterQuery<T>,
         options?: MongooseBaseQueryOptions<T>
     ) {
