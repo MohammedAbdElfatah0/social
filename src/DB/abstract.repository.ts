@@ -19,7 +19,7 @@ export abstract class AbstractRepository<T> {
     async existPopulate(
         filter: RootFilterQuery<T>,
         projection?: ProjectionType<T>,
-        options?: QueryOptions<T> & {populate?: PopulateOptions}
+        options?: QueryOptions<T> & { populate?: PopulateOptions }
     ) {
         //        const friends = await User.populate(userExist, [{ path: "friends", select: "fullName" }]);
 
@@ -39,6 +39,12 @@ export abstract class AbstractRepository<T> {
         options?: QueryOptions<T>
     ) {
         return await this.model.find(filter, projection, options);
+    }
+    async getOne(
+        filter: RootFilterQuery<T>,
+        projection?: ProjectionType<T>,
+        options?: QueryOptions<T>) {
+        return await this.model.findOne(filter, projection, options);
     }
 
     async update(

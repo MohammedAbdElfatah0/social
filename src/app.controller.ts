@@ -1,5 +1,5 @@
 import { Express, NextFunction, Request, Response } from "express"
-import { authRouter, commentRouter, postRouter, userRouter } from "./modules";
+import { authRouter, chatRouter, commentRouter, postRouter, userRouter } from "./modules";
 import { connectDB } from "./DB";
 import { AppError } from "./utils";
 import CronService from "./utils/cron";
@@ -14,6 +14,7 @@ export const bootstrap = (app: Express, express: any) => {
     app.use("/auth", authRouter);
     app.use("/comment", commentRouter);
     app.use("/post", postRouter);
+    app.use("/chat", chatRouter);
     //message
     //cron job
     CronService.job.start();
