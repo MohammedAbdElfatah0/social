@@ -5,7 +5,7 @@ import { postValidation } from "./post-graphql.schema.vaildation";
 
 export const getSpecificPost = async (parent: any, args: any, context: any) => {
     await authMiddlewareGraphql(context);
-    await isValidationGraph(postValidation, args)
+    isValidationGraph(postValidation, args)
     const postRepo = new PostRepository();
     const post = await postRepo.getOne({ _id: args.id }, {}, { populate: [{ path: "userId", select: "fullName fristName lastName email phoneNumber" }] })
 
@@ -16,5 +16,23 @@ export const getSpecificPost = async (parent: any, args: any, context: any) => {
     if (isPopulatedUser(post.userId) && post.userId.phoneNumber) {
         post.userId.phoneNumber = decryptData(post.userId.phoneNumber);
     }
+    console.log(post);
     return { message: "post found", success: true, post };
+}
+export const getAllPost = async (parent: any, args: any, context: any) => {
+    await authMiddlewareGraphql(context);
+    const postRepo = new PostRepository();
+    const post = await postRepo.getAll({}, {}, { populate: [{ path: "userId", select: "fullName fristName lastName email phoneNumber", }] })
+    console.log(post);
+    if (!post) {
+        throw new Error("Post not found")
+    }
+    const isPopulatedUser = (u: unknown): u is { phoneNumber?: string } => !!u && typeof u === "object" && "phoneNumber" in (u as any);
+    post.forEach(element => {
+        if (isPopulatedUser(element.userId) && element.userId.phoneNumber) {
+            element.userId.phoneNumber = decryptData(element.userId.phoneNumber);
+        }
+    });
+
+    return { message: "post found", success: true, post: post };
 }

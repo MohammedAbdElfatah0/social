@@ -1,7 +1,6 @@
 import { GraphQLID } from "graphql";
-import { getSpecificPost } from "./post-service.graphql";
-import { postQueryTypeResponse } from "./post-typegraphql";
-console.log("QQQQQQ")
+import { getAllPost, getSpecificPost } from "./post-service.graphql";
+import { postQueryTypeResponse, postsQueryTypeResponse } from "./post-typegraphql";
 export const PostQuery = {
     // getPost
     getPost: {
@@ -11,5 +10,9 @@ export const PostQuery = {
             id: { type: GraphQLID }
         },
         resolve: getSpecificPost
+    },
+    getAllPost: {
+        type:postsQueryTypeResponse,
+        resolve: getAllPost
     }
 };
